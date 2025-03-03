@@ -6,6 +6,7 @@ import reservationReducer from './slices/reservationSlice';
 import uiReducer from './slices/uiSlice';
 import notificationReducer from './slices/notificationSlice';
 import userReducer from './slices/userSlice';
+import settingsReducer from './slices/settingsSlice';
 
 const store = configureStore({
   reducer: {
@@ -15,7 +16,8 @@ const store = configureStore({
     reservations: reservationReducer,
     ui: uiReducer,
     notifications: notificationReducer,
-    user: userReducer,
+    users: userReducer,
+    settings: settingsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

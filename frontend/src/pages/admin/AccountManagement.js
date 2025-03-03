@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
   Typography,
@@ -27,7 +26,8 @@ import {
   InputAdornment,
   Alert,
   Tooltip,
-  CircularProgress
+  CircularProgress,
+  Snackbar
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -41,17 +41,43 @@ import {
   FileDownload as FileDownloadIcon
 } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import {
-  fetchAccounts,
-  createAccount,
-  updateAccount,
-  deleteAccount,
-  toggleAccountStatus
-} from '../../store/slices/accountSlice';
 
 const AccountManagement = () => {
-  const dispatch = useDispatch();
-  const { accounts, loading, error } = useSelector((state) => state.accounts);
+  // Dados estáticos em vez de usar o Redux
+  const [accounts, setAccounts] = useState([
+    { 
+      id: 'ACC-001', 
+      accountNumber: '12345-6',
+      userId: 2,
+      userName: 'Cliente Exemplo',
+      userEmail: 'cliente@exemplo.com',
+      balance: 5000.00,
+      currency: 'BRL',
+      status: 'active',
+      createdAt: '2025-01-15'
+    },
+    { 
+      id: 'ACC-002', 
+      accountNumber: '98765-4',
+      userId: 2,
+      userName: 'Cliente Exemplo',
+      userEmail: 'cliente@exemplo.com',
+      balance: 15000.00,
+      currency: 'BRL',
+      status: 'active',
+      createdAt: '2025-02-01'
+    }
+  ]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Snackbar para feedback
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
   
   // Estados locais
   const [openDialog, setOpenDialog] = useState(false);
@@ -61,48 +87,32 @@ const AccountManagement = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filters, setFilters] = useState({
     search: '',
-    status: 'all',
-    type: 'all'
+    status: 'all'
   });
   
   // Estado do formulário
   const [formData, setFormData] = useState({
-    holderName: '',
-    accountType: 'USD',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    dailyLimit: '',
-    transactionLimit: ''
+    accountNumber: '',
+    initialDeposit: '0',
+    dailyLimit: '5000',
+    transactionLimit: '2000',
+    initialPassword: '',
+    sendPasswordEmail: true
   });
   
   // Estado para erros do formulário
   const [formErrors, setFormErrors] = useState({});
   
-  // Buscar contas ao montar o componente
-  useEffect(() => {
-    dispatch(fetchAccounts({ page, rowsPerPage, ...filters }));
-  }, [dispatch, page, rowsPerPage, filters]);
-  
   // Validar formulário
   const validateForm = () => {
     const errors = {};
     
-    if (!formData.holderName.trim()) {
-      errors.holderName = 'Nome do titular é obrigatório';
+    if (!formData.accountNumber.trim()) {
+      errors.accountNumber = 'Número da conta é obrigatório';
     }
     
-    if (!formData.email.trim()) {
-      errors.email = 'Email é obrigatório';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email inválido';
-    }
-    
-    if (!formData.phone.trim()) {
-      errors.phone = 'Telefone é obrigatório';
+    if (!formData.initialDeposit || isNaN(formData.initialDeposit) || parseFloat(formData.initialDeposit) < 0) {
+      errors.initialDeposit = 'Depósito inicial inválido';
     }
     
     if (!formData.dailyLimit || isNaN(formData.dailyLimit) || parseFloat(formData.dailyLimit) <= 0) {
@@ -111,6 +121,10 @@ const AccountManagement = () => {
     
     if (!formData.transactionLimit || isNaN(formData.transactionLimit) || parseFloat(formData.transactionLimit) <= 0) {
       errors.transactionLimit = 'Limite por transação inválido';
+    }
+    
+    if (!formData.initialPassword.trim()) {
+      errors.initialPassword = 'Senha inicial é obrigatória';
     }
     
     setFormErrors(errors);
@@ -139,30 +153,22 @@ const AccountManagement = () => {
     if (mode === 'edit' && account) {
       setSelectedAccount(account);
       setFormData({
-        holderName: account.holderName,
-        accountType: account.accountType,
-        email: account.email,
-        phone: account.phone,
-        address: account.address || '',
-        city: account.city || '',
-        state: account.state || '',
-        zipCode: account.zipCode || '',
-        dailyLimit: account.dailyLimit,
-        transactionLimit: account.transactionLimit
+        accountNumber: account.accountNumber,
+        initialDeposit: account.balance,
+        dailyLimit: '5000',
+        transactionLimit: '2000',
+        initialPassword: '',
+        sendPasswordEmail: true
       });
     } else {
       setSelectedAccount(null);
       setFormData({
-        holderName: '',
-        accountType: 'USD',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        dailyLimit: '',
-        transactionLimit: ''
+        accountNumber: '',
+        initialDeposit: '0',
+        dailyLimit: '5000',
+        transactionLimit: '2000',
+        initialPassword: '',
+        sendPasswordEmail: true
       });
     }
     setOpenDialog(true);
@@ -179,14 +185,49 @@ const AccountManagement = () => {
     if (validateForm()) {
       try {
         if (dialogMode === 'create') {
-          await dispatch(createAccount(formData)).unwrap();
+          // Simular a criação de uma nova conta
+          const newAccount = {
+            id: `ACC-${accounts.length + 1}`,
+            accountNumber: formData.accountNumber,
+            userId: 2,
+            userName: '',
+            userEmail: '',
+            balance: parseFloat(formData.initialDeposit),
+            currency: 'BRL',
+            status: 'active',
+            createdAt: new Date().toISOString()
+          };
+          setAccounts(prev => [...prev, newAccount]);
+          setSnackbar({
+            open: true,
+            message: 'Conta criada com sucesso!',
+            severity: 'success'
+          });
         } else {
-          await dispatch(updateAccount({ id: selectedAccount.id, ...formData })).unwrap();
+          // Simular a edição de uma conta existente
+          const index = accounts.findIndex(account => account.id === selectedAccount.id);
+          if (index !== -1) {
+            accounts[index] = {
+              ...accounts[index],
+              accountNumber: formData.accountNumber,
+              balance: parseFloat(formData.initialDeposit)
+            };
+            setAccounts([...accounts]);
+            setSnackbar({
+              open: true,
+              message: 'Conta editada com sucesso!',
+              severity: 'success'
+            });
+          }
         }
         handleCloseDialog();
-        dispatch(fetchAccounts({ page, rowsPerPage, ...filters }));
       } catch (error) {
-        // Erro é tratado pelo Redux
+        setError(error.message);
+        setSnackbar({
+          open: true,
+          message: 'Erro ao salvar conta!',
+          severity: 'error'
+        });
       }
     }
   };
@@ -194,10 +235,23 @@ const AccountManagement = () => {
   // Alternar status da conta
   const handleToggleStatus = async (account) => {
     try {
-      await dispatch(toggleAccountStatus(account.id)).unwrap();
-      dispatch(fetchAccounts({ page, rowsPerPage, ...filters }));
+      const index = accounts.findIndex(acc => acc.id === account.id);
+      if (index !== -1) {
+        accounts[index].status = account.status === 'active' ? 'inactive' : 'active';
+        setAccounts([...accounts]);
+        setSnackbar({
+          open: true,
+          message: 'Status da conta alterado com sucesso!',
+          severity: 'success'
+        });
+      }
     } catch (error) {
-      // Erro é tratado pelo Redux
+      setError(error.message);
+      setSnackbar({
+        open: true,
+        message: 'Erro ao alterar status da conta!',
+        severity: 'error'
+      });
     }
   };
   
@@ -205,10 +259,23 @@ const AccountManagement = () => {
   const handleDelete = async (account) => {
     if (window.confirm('Tem certeza que deseja excluir esta conta?')) {
       try {
-        await dispatch(deleteAccount(account.id)).unwrap();
-        dispatch(fetchAccounts({ page, rowsPerPage, ...filters }));
+        const index = accounts.findIndex(acc => acc.id === account.id);
+        if (index !== -1) {
+          accounts.splice(index, 1);
+          setAccounts([...accounts]);
+          setSnackbar({
+            open: true,
+            message: 'Conta excluída com sucesso!',
+            severity: 'success'
+          });
+        }
       } catch (error) {
-        // Erro é tratado pelo Redux
+        setError(error.message);
+        setSnackbar({
+          open: true,
+          message: 'Erro ao excluir conta!',
+          severity: 'error'
+        });
       }
     }
   };
@@ -231,6 +298,41 @@ const AccountManagement = () => {
       [name]: value
     }));
     setPage(0);
+  };
+  
+  // Atualizar a tabela
+  const handleRefresh = () => {
+    setRefreshing(true);
+    // Simular uma chamada de API
+    setTimeout(() => {
+      setRefreshing(false);
+      setSnackbar({
+        open: true,
+        message: 'Dados atualizados com sucesso!',
+        severity: 'success'
+      });
+    }, 1500);
+  };
+  
+  // Exportar contas
+  const handleExport = () => {
+    setSnackbar({
+      open: true,
+      message: 'Arquivo exportado com sucesso!',
+      severity: 'success'
+    });
+  };
+  
+  // Visualizar histórico da conta
+  const handleViewHistory = (account) => {
+    setSnackbar({
+      open: true,
+      message: `Exibindo histórico da conta ${account.accountNumber}`,
+      severity: 'info'
+    });
+    
+    // Em uma implementação real, abriria um modal ou redirecionaria para uma página de histórico
+    console.log(`Histórico da conta ${account.accountNumber}`);
   };
   
   // Formatar moeda
@@ -282,21 +384,6 @@ const AccountManagement = () => {
             </FormControl>
           </Grid>
           
-          <Grid item xs={6} sm={3} md={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Tipo</InputLabel>
-              <Select
-                value={filters.type}
-                onChange={(e) => handleFilterChange('type', e.target.value)}
-                label="Tipo"
-              >
-                <MenuItem value="all">Todos</MenuItem>
-                <MenuItem value="USD">USD</MenuItem>
-                <MenuItem value="EUR">EUR</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          
           <Grid item xs={12} md={4}>
             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
               <Button
@@ -310,13 +397,14 @@ const AccountManagement = () => {
               <Button
                 variant="outlined"
                 startIcon={<FileDownloadIcon />}
+                onClick={handleExport}
               >
                 Exportar
               </Button>
               
               <IconButton
                 color="primary"
-                onClick={() => dispatch(fetchAccounts({ page, rowsPerPage, ...filters }))}
+                onClick={handleRefresh}
               >
                 <RefreshIcon />
               </IconButton>
@@ -332,8 +420,6 @@ const AccountManagement = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Número da Conta</TableCell>
-                <TableCell>Titular</TableCell>
-                <TableCell>Tipo</TableCell>
                 <TableCell align="right">Saldo</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Data de Criação</TableCell>
@@ -341,15 +427,15 @@ const AccountManagement = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
+              {refreshing ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : accounts?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                     <Typography variant="body1">Nenhuma conta encontrada</Typography>
                     <Typography variant="body2" color="text.secondary">
                       Tente ajustar os filtros ou criar uma nova conta
@@ -360,23 +446,8 @@ const AccountManagement = () => {
                 accounts?.map((account) => (
                   <TableRow key={account.id} hover>
                     <TableCell>{account.accountNumber}</TableCell>
-                    <TableCell>
-                      <Box>
-                        <Typography variant="body2">{account.holderName}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {account.email}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={account.accountType}
-                        color={account.accountType === 'USD' ? 'primary' : 'secondary'}
-                        size="small"
-                      />
-                    </TableCell>
                     <TableCell align="right">
-                      {formatCurrency(account.balance, account.accountType)}
+                      {formatCurrency(account.balance, account.currency)}
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -391,7 +462,11 @@ const AccountManagement = () => {
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
                         <Tooltip title="Histórico">
-                          <IconButton size="small" color="info">
+                          <IconButton 
+                            size="small" 
+                            color="info"
+                            onClick={() => handleViewHistory(account)}
+                          >
                             <HistoryIcon />
                           </IconButton>
                         </Tooltip>
@@ -436,7 +511,7 @@ const AccountManagement = () => {
         
         <TablePagination
           component="div"
-          count={accounts?.totalCount || 0}
+          count={accounts?.length || 0}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
@@ -462,92 +537,32 @@ const AccountManagement = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Nome do Titular"
-                name="holderName"
-                value={formData.holderName}
+                label="Número da Conta"
+                name="accountNumber"
+                value={formData.accountNumber}
                 onChange={handleChange}
-                error={!!formErrors.holderName}
-                helperText={formErrors.holderName}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Tipo de Conta</InputLabel>
-                <Select
-                  name="accountType"
-                  value={formData.accountType}
-                  onChange={handleChange}
-                  label="Tipo de Conta"
-                >
-                  <MenuItem value="USD">USD</MenuItem>
-                  <MenuItem value="EUR">EUR</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={!!formErrors.email}
-                helperText={formErrors.email}
+                error={!!formErrors.accountNumber}
+                helperText={formErrors.accountNumber}
               />
             </Grid>
             
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Telefone"
-                name="phone"
-                value={formData.phone}
+                label="Depósito Inicial"
+                name="initialDeposit"
+                type="number"
+                value={formData.initialDeposit}
                 onChange={handleChange}
-                error={!!formErrors.phone}
-                helperText={formErrors.phone}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Endereço"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Cidade"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={3}>
-              <TextField
-                fullWidth
-                label="Estado"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={3}>
-              <TextField
-                fullWidth
-                label="CEP"
-                name="zipCode"
-                value={formData.zipCode}
-                onChange={handleChange}
+                error={!!formErrors.initialDeposit}
+                helperText={formErrors.initialDeposit}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      R$
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
             
@@ -564,7 +579,7 @@ const AccountManagement = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      {formData.accountType}
+                      R$
                     </InputAdornment>
                   ),
                 }}
@@ -584,11 +599,39 @@ const AccountManagement = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      {formData.accountType}
+                      R$
                     </InputAdornment>
                   ),
                 }}
               />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Senha Inicial"
+                name="initialPassword"
+                type="password"
+                value={formData.initialPassword}
+                onChange={handleChange}
+                error={!!formErrors.initialPassword}
+                helperText={formErrors.initialPassword}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Enviar senha por email</InputLabel>
+                <Select
+                  name="sendPasswordEmail"
+                  value={formData.sendPasswordEmail}
+                  onChange={handleChange}
+                  label="Enviar senha por email"
+                >
+                  <MenuItem value={true}>Sim</MenuItem>
+                  <MenuItem value={false}>Não</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </DialogContent>
@@ -606,6 +649,21 @@ const AccountManagement = () => {
           </LoadingButton>
         </DialogActions>
       </Dialog>
+      
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+      >
+        <Alert 
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+          severity={snackbar.severity} 
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

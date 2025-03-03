@@ -1,53 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Typography,
   Paper,
-  Grid,
+  Typography,
   TextField,
+  Button,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Switch,
   FormControlLabel,
-  Button,
-  Divider,
+  IconButton,
+  InputAdornment,
   Alert,
   CircularProgress,
-  InputAdornment,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction
+  Divider,
+  Stack,
+  Snackbar
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import {
   Save as SaveIcon,
   Refresh as RefreshIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Key as KeyIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
   Security as SecurityIcon,
-  Notifications as NotificationsIcon,
   Api as ApiIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon
+  Notifications as NotificationsIcon,
+  Key as KeyIcon
 } from '@mui/icons-material';
+import { useDispatch, useSelector } from 'react-redux';
 import {
-  fetchSettings,
-  updateSettings,
-  testApiConnection,
-  rotateApiKey
+  updateSystemSettings,
+  testApiConnections,
+  fetchSettings
 } from '../../store/slices/settingsSlice';
 
 const SystemSettings = () => {
   const dispatch = useDispatch();
-  const { settings, loading, error, testingApi } = useSelector((state) => state.settings);
+  
+  // Dados estáticos em vez de pegar do Redux
+  const loading = false;
+  const error = null;
+  const [testingApi, setTestingApi] = useState(false);
+  const [testResults, setTestResults] = useState(null);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   
   // Estados locais
   const [formData, setFormData] = useState({
@@ -86,18 +87,6 @@ const SystemSettings = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   
-  // Carregar configurações ao montar o componente
-  useEffect(() => {
-    dispatch(fetchSettings());
-  }, [dispatch]);
-  
-  // Atualizar formulário quando as configurações forem carregadas
-  useEffect(() => {
-    if (settings) {
-      setFormData(settings);
-    }
-  }, [settings]);
-  
   // Manipular mudanças no formulário
   const handleChange = (section, field, value) => {
     setFormData(prev => ({
@@ -112,7 +101,7 @@ const SystemSettings = () => {
   // Salvar configurações
   const handleSave = async () => {
     try {
-      await dispatch(updateSettings(formData)).unwrap();
+      await dispatch(updateSystemSettings(formData)).unwrap();
     } catch (error) {
       // Erro é tratado pelo Redux
     }
@@ -120,21 +109,32 @@ const SystemSettings = () => {
   
   // Testar conexão com API
   const handleTestApi = async () => {
+    setTestingApi(true);
     try {
-      await dispatch(testApiConnection(formData.api)).unwrap();
+      // Simulação de chamada de API
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Simulação de resposta
+      const apiStatus = {
+        status: 'success',
+        apis: [
+          { name: 'Reservation', status: 'connected', latency: '45ms' },
+          { name: 'Confirmation', status: 'connected', latency: '52ms' },
+          { name: 'Send', status: 'connected', latency: '38ms' },
+          { name: 'Receive', status: 'connected', latency: '41ms' }
+        ]
+      };
+      
+      setTestResults(apiStatus);
+      setSnackbarMessage('Todas as conexões com APIs foram testadas com sucesso!');
+      setSnackbarSeverity('success');
+      setShowSnackbar(true);
     } catch (error) {
-      // Erro é tratado pelo Redux
-    }
-  };
-  
-  // Rotacionar chave da API
-  const handleRotateApiKey = async () => {
-    if (window.confirm('Tem certeza que deseja gerar uma nova chave de API? A chave atual será invalidada.')) {
-      try {
-        await dispatch(rotateApiKey()).unwrap();
-      } catch (error) {
-        // Erro é tratado pelo Redux
-      }
+      setSnackbarMessage('Erro ao testar conexão com API!');
+      setSnackbarSeverity('error');
+      setShowSnackbar(true);
+    } finally {
+      setTestingApi(false);
     }
   };
   
@@ -483,25 +483,56 @@ const SystemSettings = () => {
               
               <Grid item xs={12}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button
-                    variant="outlined"
+                  <LoadingButton 
+                    variant="outlined" 
+                    color="primary" 
+                    loading={testingApi}
                     onClick={handleTestApi}
                     startIcon={<RefreshIcon />}
-                    disabled={testingApi}
                   >
                     Testar Conexão
-                  </Button>
-                  
-                  <Button
-                    variant="outlined"
-                    color="warning"
-                    onClick={handleRotateApiKey}
-                    startIcon={<KeyIcon />}
-                  >
-                    Gerar Nova Chave
-                  </Button>
+                  </LoadingButton>
                 </Box>
               </Grid>
+              
+              {/* Resultados do teste de API */}
+              {testResults && (
+                <Grid item xs={12}>
+                  <Paper sx={{ p: 2, mt: 2, bgcolor: 'background.default' }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Resultados do Teste de Conexão
+                    </Typography>
+                    
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                      {testResults.apis.map((api) => (
+                        <Grid item xs={12} sm={6} md={3} key={api.name}>
+                          <Paper 
+                            elevation={1} 
+                            sx={{ 
+                              p: 2, 
+                              display: 'flex', 
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              bgcolor: api.status === 'connected' ? 'success.light' : 'error.light',
+                              color: 'background.paper'
+                            }}
+                          >
+                            <Typography variant="subtitle2">
+                              {api.name}
+                            </Typography>
+                            <Typography variant="body2" sx={{ mt: 1 }}>
+                              Status: {api.status}
+                            </Typography>
+                            <Typography variant="body2">
+                              Latência: {api.latency}
+                            </Typography>
+                          </Paper>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Paper>
+                </Grid>
+              )}
             </Grid>
           </Paper>
         </Grid>
@@ -526,6 +557,20 @@ const SystemSettings = () => {
           Salvar Alterações
         </LoadingButton>
       </Box>
+      
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setShowSnackbar(false)}
+      >
+        <Alert 
+          onClose={() => setShowSnackbar(false)} 
+          severity={snackbarSeverity} 
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

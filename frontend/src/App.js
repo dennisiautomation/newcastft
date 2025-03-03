@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Provider, useSelector, useDispatch } from 'react-redux';
-import store from './store';
+import { useSelector, useDispatch } from 'react-redux';
 import theme from './theme';
 import { checkAuthStatus } from './store/slices/authSlice';
 
@@ -17,6 +16,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import SetPassword from './pages/auth/SetPassword';
 import TwoFactorAuth from './pages/auth/TwoFactorAuth';
 
 // Admin Pages
@@ -53,8 +53,7 @@ const ProtectedRoute = ({ element, requiredRole }) => {
   return element;
 };
 
-// App Component
-const AppContent = () => {
+const App = () => {
   const dispatch = useDispatch();
   const { theme: uiTheme } = useSelector((state) => state.ui);
   
@@ -62,8 +61,21 @@ const AppContent = () => {
     dispatch(checkAuthStatus());
   }, [dispatch]);
   
+  // Create theme based on user preference
+  const appliedTheme = React.useMemo(
+    () => ({
+      ...theme,
+      palette: {
+        ...theme.palette,
+        mode: uiTheme?.mode || 'light',
+      },
+    }),
+    [uiTheme]
+  );
+  
   return (
-    <Router>
+    <ThemeProvider theme={appliedTheme}>
+      <CssBaseline />
       <Routes>
         {/* Auth Routes */}
         <Route path="/" element={<AuthLayout />}>
@@ -72,6 +84,7 @@ const AppContent = () => {
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password/:token" element={<ResetPassword />} />
+          <Route path="set-password/:token" element={<SetPassword />} />
           <Route path="two-factor" element={<TwoFactorAuth />} />
         </Route>
         
@@ -100,40 +113,8 @@ const AppContent = () => {
         <Route path="/maintenance" element={<Maintenance />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </Router>
-  );
-};
-
-const App = () => {
-  const uiTheme = useSelector((state) => state.ui.theme);
-  
-  // Create theme based on user preference
-  const appliedTheme = React.useMemo(
-    () => ({
-      ...theme,
-      palette: {
-        ...theme.palette,
-        mode: uiTheme?.mode || 'light',
-      },
-    }),
-    [uiTheme]
-  );
-  
-  return (
-    <ThemeProvider theme={appliedTheme}>
-      <CssBaseline />
-      <AppContent />
     </ThemeProvider>
   );
 };
 
-// Wrapper component to include Redux provider
-const AppWrapper = () => {
-  return (
-    <Provider store={store}>
-      <App />
-    </Provider>
-  );
-};
-
-export default AppWrapper;
+export default App;
