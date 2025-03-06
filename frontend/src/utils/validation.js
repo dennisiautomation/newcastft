@@ -47,6 +47,25 @@ export const validatePassword = (password) => {
 };
 
 /**
+ * Validates password strength (simplified version of validatePassword)
+ * @param {string} password - The password to validate
+ * @returns {boolean} True if password meets minimum requirements
+ */
+export const isValidPassword = (password) => {
+  if (!password || password.length < 8) {
+    return false;
+  }
+  
+  // Check for uppercase letters, lowercase letters, numbers, and special characters
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  
+  return hasUppercase && hasLowercase && hasNumber && hasSpecial;
+};
+
+/**
  * Validates a phone number format
  * @param {string} phone - The phone number to validate
  * @returns {boolean} True if phone format is valid

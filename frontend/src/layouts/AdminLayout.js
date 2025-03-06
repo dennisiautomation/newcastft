@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   AppBar, 
@@ -36,9 +36,17 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import HelpIcon from '@mui/icons-material/Help';
 import SecurityIcon from '@mui/icons-material/Security';
 import PersonIcon from '@mui/icons-material/Person';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import FolderSharedIcon from '@mui/icons-material/FolderShared';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
+import TranslateIcon from '@mui/icons-material/Translate';
 
 import { logout } from '../store/slices/authSlice';
 import { toggleSidebar, setSidebarOpen } from '../store/slices/uiSlice';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translate } from '../utils/translations';
 
 // Drawer width
 const drawerWidth = 280;
@@ -88,12 +96,13 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-const AdminLayout = () => {
+const AdminLayout = ({ children }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { language, toggleLanguage } = useLanguage();
   
   // Get user data and sidebar state from Redux
   const { user } = useSelector((state) => state.auth);
@@ -140,11 +149,14 @@ const AdminLayout = () => {
   
   // Navigation items
   const navItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
-    { text: 'Account Management', icon: <AccountBalanceIcon />, path: '/admin/accounts' },
-    { text: 'User Management', icon: <PeopleIcon />, path: '/admin/users' },
-    { text: 'Transaction Monitoring', icon: <CompareArrowsIcon />, path: '/admin/transactions' },
-    { text: 'System Settings', icon: <SettingsIcon />, path: '/admin/settings' },
+    { text: translate('Dashboard', language), icon: <DashboardIcon />, path: '/admin/dashboard' },
+    { text: translate('Account Management', language), icon: <AccountBalanceIcon />, path: '/admin/accounts' },
+    { text: translate('User Management', language), icon: <PeopleIcon />, path: '/admin/users' },
+    { text: translate('Transaction Monitoring', language), icon: <CompareArrowsIcon />, path: '/admin/transactions' },
+    { text: translate('My Account', language), icon: <AccountBoxIcon />, path: '/admin/my-account' },
+    { text: translate('Client Transactions', language), icon: <PeopleOutlineIcon />, path: '/admin/client-transactions' },
+    { text: translate('Reports', language), icon: <AssessmentIcon />, path: '/admin/reports' },
+    { text: translate('System Settings', language), icon: <SettingsIcon />, path: '/admin/settings' },
   ];
   
   // Format user's name for display
@@ -170,9 +182,9 @@ const AdminLayout = () => {
     <>
       <DrawerHeader>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', pl: 2 }}>
-          <Typography variant="h6" color="primary" sx={{ fontWeight: 700, flexGrow: 1 }}>
-            NewCash Admin
-          </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '40px' }} />
+          </Box>
           <IconButton onClick={handleDrawerToggle}>
             <ChevronLeftIcon />
           </IconButton>
@@ -197,7 +209,7 @@ const AdminLayout = () => {
           {formatUserName()}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Administrator
+          {translate('Administrator', language)}
         </Typography>
       </Box>
       
@@ -327,9 +339,21 @@ const AdminLayout = () => {
               </IconButton>
             </Tooltip>
             
+            {/* Language Toggle Button */}
+            <Tooltip title={translate('Change Language', language)}>
+              <IconButton 
+                size="large" 
+                color="inherit" 
+                onClick={toggleLanguage}
+                sx={{ ml: 1 }}
+              >
+                <TranslateIcon />
+              </IconButton>
+            </Tooltip>
+            
             {/* User menu */}
             <Tooltip title="Account settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 2 }}>
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 1 }}>
                 <Avatar sx={{ bgcolor: 'secondary.main' }}>
                   {getUserInitials()}
                 </Avatar>
@@ -443,7 +467,7 @@ const AdminLayout = () => {
       {/* Main Content */}
       <Main open={isDrawerOpen}>
         <DrawerHeader />
-        <Outlet />
+        {children}
       </Main>
     </Box>
   );

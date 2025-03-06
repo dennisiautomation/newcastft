@@ -21,7 +21,7 @@ import {
 } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { setInitialPassword } from '../../store/slices/authSlice';
-import newcashLogo from '../../assets/images/newcash-logo-official.png';
+import newcashLogo from '../../assets/images/newcash-logo-official.svg';
 
 const SetPassword = () => {
   const { token } = useParams();

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   AppBar, 
@@ -34,9 +34,13 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HelpIcon from '@mui/icons-material/Help';
 import SettingsIcon from '@mui/icons-material/Settings';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import TranslateIcon from '@mui/icons-material/Translate';
 
 import { logout } from '../store/slices/authSlice';
 import { toggleSidebar, setSidebarOpen } from '../store/slices/uiSlice';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translate } from '../utils/translations';
 
 // Drawer width
 const drawerWidth = 280;
@@ -86,12 +90,13 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-const ClientLayout = () => {
+const ClientLayout = ({ children }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { language, toggleLanguage } = useLanguage();
   
   // Get user data and sidebar state from Redux
   const { user } = useSelector((state) => state.auth);
@@ -138,10 +143,11 @@ const ClientLayout = () => {
   
   // Navigation items
   const navItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/client/dashboard' },
-    { text: 'Transfer Funds', icon: <SendIcon />, path: '/client/transfer' },
-    { text: 'Transaction History', icon: <ListAltIcon />, path: '/client/transactions' },
-    { text: 'Profile', icon: <PersonIcon />, path: '/client/profile' },
+    { text: translate('Dashboard', language), icon: <DashboardIcon />, path: '/dashboard' },
+    { text: translate('My Account', language), icon: <AccountBoxIcon />, path: '/my-account' },
+    { text: translate('Transfer Funds', language), icon: <SendIcon />, path: '/transfers' },
+    { text: translate('Transaction History', language), icon: <ListAltIcon />, path: '/transactions' },
+    { text: translate('Profile', language), icon: <PersonIcon />, path: '/profile' },
   ];
   
   // Format user's name for display
@@ -167,9 +173,9 @@ const ClientLayout = () => {
     <>
       <DrawerHeader>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', pl: 2 }}>
-          <Typography variant="h6" color="primary" sx={{ fontWeight: 700, flexGrow: 1 }}>
-            NewCash Bank
-          </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '40px' }} />
+          </Box>
           <IconButton onClick={handleDrawerToggle}>
             <ChevronLeftIcon />
           </IconButton>
@@ -301,9 +307,21 @@ const ClientLayout = () => {
               </IconButton>
             </Tooltip>
             
+            {/* Language Toggle Button */}
+            <Tooltip title={translate('Change Language', language)}>
+              <IconButton 
+                size="large" 
+                color="inherit" 
+                onClick={toggleLanguage}
+                sx={{ ml: 1 }}
+              >
+                <TranslateIcon />
+              </IconButton>
+            </Tooltip>
+            
             {/* User menu */}
             <Tooltip title="Account settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 2 }}>
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 1 }}>
                 <Avatar sx={{ bgcolor: 'primary.main' }}>
                   {getUserInitials()}
                 </Avatar>
@@ -417,7 +435,7 @@ const ClientLayout = () => {
       {/* Main Content */}
       <Main open={isDrawerOpen}>
         <DrawerHeader />
-        <Outlet />
+        {children}
       </Main>
     </Box>
   );

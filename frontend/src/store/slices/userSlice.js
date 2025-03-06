@@ -1,6 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// Thunk para buscar todos os usuários (admin)
+export const fetchUsers = createAsyncThunk(
+  'user/fetchUsers',
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await axios.get('/api/users', { params });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Falha ao buscar usuários'
+      );
+    }
+  }
+);
+
 // Thunk para buscar preferências do usuário
 export const fetchUserPreferences = createAsyncThunk(
   'user/fetchPreferences',
@@ -56,7 +71,8 @@ const initialState = {
     loginNotifications: true
   },
   loading: false,
-  error: null
+  error: null,
+  users: []
 };
 
 const userSlice = createSlice({
@@ -115,10 +131,23 @@ const userSlice = createSlice({
       .addCase(updateSecuritySettings.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      
+      // fetchUsers
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.users = action.payload;
+      })
+      .addCase(fetchUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   }
 });
 
 export const { setDarkMode, clearError } = userSlice.actions;
-
 export default userSlice.reducer;

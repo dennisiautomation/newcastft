@@ -51,29 +51,34 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      // Admin principal fixo para garantir acesso administrativo
-      if (credentials.email === 'admin@newcashbank.com.br' && credentials.password === 'NewCash2025') {
-        // Gerar token simulado para admin
-        const adminToken = `admin_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-        const adminRefreshToken = `refresh_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      // Credenciais fixas para garantir acesso
+      if (
+        (credentials.email === 'admin@newcash.com' && credentials.password === 'Admin@123') ||
+        (credentials.email === 'cliente@newcash.com' && credentials.password === 'Cliente@123')
+      ) {
+        const isAdmin = credentials.email === 'admin@newcash.com';
+        
+        // Gerar token simulado
+        const token = `user_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+        const refreshToken = `refresh_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
         
         // Salvar tokens no localStorage
-        setToken(adminToken);
-        setRefreshToken(adminRefreshToken);
+        setToken(token);
+        setRefreshToken(refreshToken);
         
-        // Retornar dados do usuário admin
+        // Retornar dados do usuário
         return {
           user: {
-            id: 'admin-principal',
-            email: 'admin@newcashbank.com.br',
-            name: 'Administrador Principal',
-            role: 'admin',
+            id: isAdmin ? 'admin-user' : 'client-user',
+            email: credentials.email,
+            name: isAdmin ? 'Admin User' : 'Cliente Teste',
+            role: isAdmin ? 'admin' : 'client',
             status: 'active',
             createdAt: new Date().toISOString(),
             lastLogin: new Date().toISOString()
           },
-          token: adminToken,
-          refreshToken: adminRefreshToken
+          token: token,
+          refreshToken: refreshToken
         };
       }
       

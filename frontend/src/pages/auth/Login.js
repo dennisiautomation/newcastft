@@ -12,7 +12,9 @@ import {
   IconButton, 
   Alert,
   CircularProgress,
-  Divider
+  Divider,
+  Container,
+  Paper
 } from '@mui/material';
 import { Visibility, VisibilityOff, LockOutlined, EmailOutlined } from '@mui/icons-material';
 import { login, clearError } from '../../store/slices/authSlice';
@@ -87,116 +89,120 @@ const Login = () => {
   };
   
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-      <Box sx={{ textAlign: 'center', mb: 3 }}>
-        <Typography component="h1" variant="h5" gutterBottom>
-          Welcome to NewCash Bank
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Sign in to access your account
-        </Typography>
-      </Box>
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      
-      <TextField
-        margin="normal"
-        required
-        fullWidth
-        id="email"
-        label="Email Address"
-        name="email"
-        autoComplete="email"
-        autoFocus
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={!!formErrors.email}
-        helperText={formErrors.email}
-        disabled={loading}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <EmailOutlined />
-            </InputAdornment>
-          ),
-        }}
-      />
-      
-      <TextField
-        margin="normal"
-        required
-        fullWidth
-        name="password"
-        label="Password"
-        type={showPassword ? 'text' : 'password'}
-        id="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        error={!!formErrors.password}
-        helperText={formErrors.password}
-        disabled={loading}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <LockOutlined />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={() => setShowPassword(!showPassword)}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        size="large"
-        sx={{ mt: 3, mb: 2 }}
-        disabled={loading}
-      >
-        {loading ? <CircularProgress size={24} /> : 'Sign In'}
-      </Button>
-      
-      <Grid container justifyContent="space-between">
-        <Grid item>
-          <Link component={RouterLink} to="/forgot-password" variant="body2">
-            Forgot password?
-          </Link>
-        </Grid>
-        <Grid item>
-          <Link component={RouterLink} to="/register" variant="body2">
-            {"Don't have an account? Sign Up"}
-          </Link>
-        </Grid>
-      </Grid>
-      
-      <Box sx={{ mt: 3, mb: 1 }}>
-        <Divider>
-          <Typography variant="caption" color="text.secondary">
-            Secure Banking
+    <Container maxWidth="xs">
+      <Paper elevation={3} sx={{ p: 3, mt: 8 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '60px' }} />
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              Sign in to access your account
+            </Typography>
+          </Box>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={!!formErrors.email}
+            helperText={formErrors.email}
+            disabled={loading}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EmailOutlined />
+                </InputAdornment>
+              ),
+            }}
+          />
+          
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={!!formErrors.password}
+            helperText={formErrors.password}
+            disabled={loading}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockOutlined />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : 'Sign In'}
+          </Button>
+          
+          <Grid container justifyContent="space-between">
+            <Grid item>
+              <Link component={RouterLink} to="/forgot-password" variant="body2">
+                Forgot password?
+              </Link>
+            </Grid>
+            <Grid item>
+              <Link component={RouterLink} to="/register" variant="body2">
+                {"Don't have an account? Sign Up"}
+              </Link>
+            </Grid>
+          </Grid>
+          
+          <Box sx={{ mt: 3, mb: 1 }}>
+            <Divider>
+              <Typography variant="caption" color="text.secondary">
+                Secure Banking
+              </Typography>
+            </Divider>
+          </Box>
+          
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+            By signing in, you agree to our Terms of Service and Privacy Policy
           </Typography>
-        </Divider>
-      </Box>
-      
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
-        By signing in, you agree to our Terms of Service and Privacy Policy
-      </Typography>
-    </Box>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 

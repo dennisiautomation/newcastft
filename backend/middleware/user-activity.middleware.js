@@ -8,6 +8,12 @@ const jwt = require('jsonwebtoken');
 const userActivityMiddleware = (action) => {
   return async (req, res, next) => {
     try {
+      // Em ambiente de desenvolvimento, ignorar o registro de atividades
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Ambiente de desenvolvimento: Ignorando registro de atividade "${action}"`);
+        return next();
+      }
+      
       // Extrai o token de autenticação do cabeçalho
       const token = req.headers.authorization?.split(' ')[1];
       

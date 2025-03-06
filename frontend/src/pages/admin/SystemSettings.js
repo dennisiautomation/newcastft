@@ -34,8 +34,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import {
   updateSystemSettings,
-  testApiConnections,
-  fetchSettings
+  testApiConnections
 } from '../../store/slices/settingsSlice';
 
 const SystemSettings = () => {
@@ -542,7 +541,6 @@ const SystemSettings = () => {
       <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
         <Button
           variant="outlined"
-          onClick={() => dispatch(fetchSettings())}
           startIcon={<RefreshIcon />}
         >
           Recarregar

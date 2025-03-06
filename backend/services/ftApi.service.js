@@ -1,5 +1,6 @@
 const axios = require('axios');
 const LoggerService = require('./logger.service');
+const https = require('https');
 
 class FTApiService {
   constructor() {
@@ -8,14 +9,19 @@ class FTApiService {
     this.usdAccount = process.env.USD_ACCOUNT || '60428';
     this.eurAccount = process.env.EUR_ACCOUNT || '60429';
 
+    // Configurar o agente HTTPS para lidar com certificados em produção
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: true // Validar certificados em produção
+    });
+
     // Initialize axios instance with common configuration
     this.api = axios.create({
       baseURL: this.baseUrl,
-      timeout: 10000, // 10 seconds timeout
+      timeout: 30000, // 30 seconds timeout para ambiente de produção
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+        'Accept': '*/*'
+      },
+      httpsAgent // Adicionar o agente HTTPS para suporte SSL
     });
 
     // Add request interceptor for logging
@@ -84,22 +90,27 @@ class FTApiService {
   async getReservations(account, reservationCode) {
     const startTime = Date.now();
     try {
-      let url = `/Reservation.asp?key=${this.apiKey}`;
+      // Construir a URL para a API exatamente como nos exemplos da produção
+      let url = `/reservation.asp?key=${this.apiKey}`;
       
       if (account) {
         url += `&account=${account}`;
       } else if (reservationCode) {
-        url += `&Reservation=${reservationCode}`;
+        url += `&Res_code=${reservationCode}`;
       } else {
         throw new Error('Either account or reservation code must be provided');
       }
 
+      console.log('URL da requisição:', url);
+      console.log('URL base:', this.baseUrl);
+      
+      // Usar a instância this.api que já está configurada
       const response = await this.api.get(url);
       
       // Log successful API call
       const responseTime = Date.now() - startTime;
       LoggerService.logApiCall(
-        'GET /Reservation.asp',
+        'GET /reservation.asp',
         { account, reservationCode },
         response.data,
         response.status,
@@ -113,7 +124,7 @@ class FTApiService {
       // Log failed API call
       const responseTime = Date.now() - startTime;
       LoggerService.logApiCall(
-        'GET /Reservation.asp',
+        'GET /reservation.asp',
         { account, reservationCode },
         error.response?.data || {},
         error.response?.status || 500,
@@ -130,7 +141,41 @@ class FTApiService {
    * @returns {Promise<Object>} USD account reservations
    */
   async getUsdReservations() {
-    return this.getReservations(this.usdAccount);
+    const startTime = Date.now();
+    try {
+      // Usar a URL exata conforme a produção
+      const url = `/reservation.asp?key=${this.apiKey}&account=${this.usdAccount}`;
+      console.log('URL da requisição USD:', url);
+      
+      const response = await this.api.get(url);
+      
+      // Log successful API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET USD Reservations',
+        { account: this.usdAccount },
+        response.data,
+        response.status,
+        responseTime
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error getting USD reservations: ${error.message}`);
+      
+      // Log failed API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET USD Reservations',
+        { account: this.usdAccount },
+        error.response?.data || {},
+        error.response?.status || 500,
+        responseTime,
+        error
+      );
+      
+      throw error;
+    }
   }
 
   /**
@@ -138,7 +183,41 @@ class FTApiService {
    * @returns {Promise<Object>} EUR account reservations
    */
   async getEurReservations() {
-    return this.getReservations(this.eurAccount);
+    const startTime = Date.now();
+    try {
+      // Usar a URL exata conforme a produção
+      const url = `/reservation.asp?key=${this.apiKey}&account=${this.eurAccount}`;
+      console.log('URL da requisição EUR:', url);
+      
+      const response = await this.api.get(url);
+      
+      // Log successful API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET EUR Reservations',
+        { account: this.eurAccount },
+        response.data,
+        response.status,
+        responseTime
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error getting EUR reservations: ${error.message}`);
+      
+      // Log failed API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET EUR Reservations',
+        { account: this.eurAccount },
+        error.response?.data || {},
+        error.response?.status || 500,
+        responseTime,
+        error
+      );
+      
+      throw error;
+    }
   }
 
   /**
@@ -147,7 +226,13 @@ class FTApiService {
    * @returns {Promise<Object>} Reservation details
    */
   async getReservationByCode(reservationCode) {
-    return this.getReservations(null, reservationCode);
+    try {
+      // Usar a URL exata conforme a produção
+      return this.getReservations(null, reservationCode);
+    } catch (error) {
+      console.error(`Error getting reservation by code: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -158,26 +243,17 @@ class FTApiService {
   async confirmReservation(confirmationData) {
     const startTime = Date.now();
     try {
-      const url = `/Reservation_confirmation.asp`;
+      // Usar a URL exata conforme a produção
+      const url = `/reservation_confirmation.asp`;
+      console.log('URL da requisição de confirmação:', url);
       
-      // Ensure required fields are present
-      if (!confirmationData.reservationCode) {
-        throw new Error('Reservation code is required');
-      }
-
-      // Add API key to the data
-      const data = {
-        ...confirmationData,
-        key: this.apiKey
-      };
-
-      const response = await this.api.post(url, data);
+      const response = await this.api.post(url, confirmationData);
       
       // Log successful API call
       const responseTime = Date.now() - startTime;
       LoggerService.logApiCall(
-        'POST /Reservation_confirmation.asp',
-        data,
+        'POST /reservation_confirmation.asp',
+        {},
         response.data,
         response.status,
         responseTime
@@ -190,8 +266,8 @@ class FTApiService {
       // Log failed API call
       const responseTime = Date.now() - startTime;
       LoggerService.logApiCall(
-        'POST /Reservation_confirmation.asp',
-        confirmationData,
+        'POST /reservation_confirmation.asp',
+        {},
         error.response?.data || {},
         error.response?.status || 500,
         responseTime,
@@ -209,14 +285,17 @@ class FTApiService {
   async checkIncomingTransfers() {
     const startTime = Date.now();
     try {
+      // Usar a URL exata conforme a produção
       const url = `/receiving.asp?key=${this.apiKey}`;
+      console.log('URL da requisição de transferências recebidas:', url);
+      
       const response = await this.api.get(url);
       
       // Log successful API call
       const responseTime = Date.now() - startTime;
       LoggerService.logApiCall(
         'GET /receiving.asp',
-        { key: this.apiKey },
+        {},
         response.data,
         response.status,
         responseTime
@@ -230,7 +309,7 @@ class FTApiService {
       const responseTime = Date.now() - startTime;
       LoggerService.logApiCall(
         'GET /receiving.asp',
-        { key: this.apiKey },
+        {},
         error.response?.data || {},
         error.response?.status || 500,
         responseTime,
@@ -249,6 +328,7 @@ class FTApiService {
   async sendTransfer(transferData) {
     const startTime = Date.now();
     try {
+      // Usar a URL exata conforme a produção
       const url = `/send.asp?key=${this.apiKey}`;
       
       // Ensure required fields are present
@@ -434,6 +514,90 @@ class FTApiService {
         { account: accountNumber },
         {},
         500,
+        responseTime,
+        error
+      );
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Get USD account transactions
+   * @returns {Promise<Object>} USD account transactions
+   */
+  async getUsdTransactions() {
+    const startTime = Date.now();
+    try {
+      // Usar a URL exata conforme a produção
+      const url = `/reservation.asp?key=${this.apiKey}&account=${this.usdAccount}`;
+      console.log('URL da requisição de transações USD:', url);
+      
+      const response = await this.api.get(url);
+      
+      // Log successful API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET USD Transactions',
+        { account: this.usdAccount },
+        response.data,
+        response.status,
+        responseTime
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error getting USD transactions: ${error.message}`);
+      
+      // Log failed API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET USD Transactions',
+        { account: this.usdAccount },
+        error.response?.data || {},
+        error.response?.status || 500,
+        responseTime,
+        error
+      );
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Get EUR account transactions
+   * @returns {Promise<Object>} EUR account transactions
+   */
+  async getEurTransactions() {
+    const startTime = Date.now();
+    try {
+      // Usar a URL exata conforme a produção
+      const url = `/reservation.asp?key=${this.apiKey}&account=${this.eurAccount}`;
+      console.log('URL da requisição de transações EUR:', url);
+      
+      const response = await this.api.get(url);
+      
+      // Log successful API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET EUR Transactions',
+        { account: this.eurAccount },
+        response.data,
+        response.status,
+        responseTime
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error getting EUR transactions: ${error.message}`);
+      
+      // Log failed API call
+      const responseTime = Date.now() - startTime;
+      LoggerService.logApiCall(
+        'GET EUR Transactions',
+        { account: this.eurAccount },
+        error.response?.data || {},
+        error.response?.status || 500,
         responseTime,
         error
       );

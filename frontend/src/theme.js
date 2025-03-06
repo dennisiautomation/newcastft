@@ -4,16 +4,16 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#0066cc',
-      light: '#4d8fe0',
-      dark: '#004c99',
+      main: '#00234B', // Azul escuro do logo NewCash Bank
+      light: '#1E3D70',
+      dark: '#00132D',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#19857b',
-      light: '#4db6ac',
-      dark: '#006064',
-      contrastText: '#ffffff',
+      main: '#FFB800', // Amarelo/Dourado como cor complementar
+      light: '#FFCF4D',
+      dark: '#D19A00',
+      contrastText: '#000000',
     },
     error: {
       main: '#d32f2f',
@@ -36,11 +36,11 @@ const theme = createTheme({
       dark: '#1b5e20',
     },
     background: {
-      default: '#f8f9fa',
+      default: '#F8F9FA',
       paper: '#ffffff',
     },
     text: {
-      primary: '#212529',
+      primary: '#00234B', // Mesmo azul do logo para textos importantes
       secondary: '#495057',
       disabled: '#6c757d',
     },
@@ -118,77 +118,137 @@ const theme = createTheme({
     '0px 10px 14px -6px rgba(0,0,0,0.1),0px 22px 35px 3px rgba(0,0,0,0.07),0px 8px 42px 7px rgba(0,0,0,0.06)',
     '0px 11px 14px -7px rgba(0,0,0,0.1),0px 23px 36px 3px rgba(0,0,0,0.07),0px 9px 44px 8px rgba(0,0,0,0.06)',
     '0px 11px 15px -7px rgba(0,0,0,0.1),0px 24px 38px 3px rgba(0,0,0,0.07),0px 9px 46px 8px rgba(0,0,0,0.06)',
-  ],
+  },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           borderRadius: 6,
           textTransform: 'none',
+          fontWeight: 500,
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2),0px 4px 5px 0px rgba(0,0,0,0.14),0px 1px 10px 0px rgba(0,0,0,0.12)',
+            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
           },
         },
         containedPrimary: {
           '&:hover': {
-            backgroundColor: '#004c99',
+            backgroundColor: '#00132D',
           },
         },
         outlinedPrimary: {
-          borderColor: '#0066cc',
+          borderColor: '#00234B',
           '&:hover': {
-            backgroundColor: 'rgba(0, 102, 204, 0.04)',
+            backgroundColor: 'rgba(0, 35, 75, 0.04)',
           },
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.1)',
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
-        rounded: {
-          borderRadius: 12,
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 8,
-          },
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
+        },
+        elevation1: {
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.12)',
+          boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.1)',
+          backgroundImage: 'none',
+        },
+        colorPrimary: {
+          backgroundColor: '#ffffff',
+          color: '#00234B',
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          borderRight: 'none',
-          boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.12)',
+          backgroundColor: '#ffffff',
+          borderRight: '1px solid rgba(0, 35, 75, 0.08)',
         },
       },
     },
-    MuiTable: {
+    MuiCard: {
       styleOverrides: {
         root: {
-          '& .MuiTableCell-head': {
-            fontWeight: 600,
-            backgroundColor: '#f8f9fa',
+          borderRadius: 8,
+          overflow: 'hidden',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
           },
+        },
+      },
+    },
+    MuiCardHeader: {
+      styleOverrides: {
+        root: {
+          padding: '16px 24px',
+        },
+        title: {
+          fontSize: '1.125rem',
+          fontWeight: 600,
+          color: '#00234B',
+        },
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          padding: '24px',
+          '&:last-child': {
+            paddingBottom: 24,
+          },
+        },
+      },
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(0, 35, 75, 0.03)',
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          fontWeight: 600,
+          color: '#00234B',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 4,
+        },
+      },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          borderRadius: 6,
+        },
+      },
+    },
+    MuiAvatar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#00234B',
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: '#00234B',
+          fontSize: '0.75rem',
         },
       },
     },

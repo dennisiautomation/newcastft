@@ -17,7 +17,15 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Chip
+  Chip,
+  Menu,
+  MenuItem,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody
 } from '@mui/material';
 import {
   AccountBalance as AccountBalanceIcon,
@@ -29,32 +37,56 @@ import {
   Info as InfoIcon,
   Refresh as RefreshIcon,
   FileDownload as FileDownloadIcon,
-  History as HistoryIcon
+  History as HistoryIcon,
+  PictureAsPdf as PdfIcon,
+  Receipt as ReceiptIcon,
+  MoreVert as MoreVertIcon,
+  ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
-  fetchAccountDetails,
-  fetchAccountLimits,
-  fetchRecentTransactions
+  fetchUserAccounts,
+  fetchAccountById
 } from '../../store/slices/accountSlice';
+import { fetchAccountTransactions } from '../../store/slices/transactionSlice';
+import axios from 'axios';
 
 const AccountDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { accountId } = useParams();
   const {
+    userAccounts,
     accountDetails,
-    limits,
-    recentTransactions,
+    accountTransactions,
     loading,
     error
   } = useSelector((state) => state.accounts);
   
+  const [statementMenuAnchor, setStatementMenuAnchor] = useState(null);
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0], // 1 mês atrás
+    endDate: new Date().toISOString().split('T')[0] // hoje
+  });
+  
   // Buscar dados ao montar o componente
   useEffect(() => {
-    dispatch(fetchAccountDetails());
-    dispatch(fetchAccountLimits());
-    dispatch(fetchRecentTransactions({ limit: 5 }));
-  }, [dispatch]);
+    // Buscar contas do usuário
+    dispatch(fetchUserAccounts());
+    
+    // Buscar detalhes da conta atual
+    if (accountId) {
+      dispatch(fetchAccountById(accountId));
+    }
+    
+    // Buscar transações recentes
+    if (accountId) {
+      dispatch(fetchAccountTransactions({ 
+        accountId: accountId,
+        params: { limit: 5 }
+      }));
+    }
+  }, [dispatch, accountId]);
   
   // Formatar moeda
   const formatCurrency = (amount, currency = 'USD') => {
@@ -82,7 +114,59 @@ const AccountDetails = () => {
   
   // Navegar para histórico
   const handleViewHistory = () => {
-    navigate('/history');
+    navigate(`/history?accountId=${accountId}`);
+  };
+  
+  // Abrir menu de extratos
+  const handleStatementMenuOpen = (event) => {
+    setStatementMenuAnchor(event.currentTarget);
+  };
+  
+  // Fechar menu de extratos
+  const handleStatementMenuClose = () => {
+    setStatementMenuAnchor(null);
+  };
+  
+  // Visualizar extrato online
+  const handleViewStatement = () => {
+    handleStatementMenuClose();
+    navigate(`/statements/accounts/${accountId}?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`);
+  };
+  
+  // Baixar extrato em PDF
+  const handleDownloadPdf = async () => {
+    handleStatementMenuClose();
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios({
+        url: `/api/statements/accounts/${accountId}/pdf?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+        method: 'GET',
+        responseType: 'blob',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      // Criar URL para o blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `extrato_${accountDetails.accountNumber}_${new Date().toISOString().slice(0, 10)}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Limpar
+      window.URL.revokeObjectURL(url);
+      link.remove();
+    } catch (error) {
+      console.error('Erro ao baixar extrato:', error);
+    }
+  };
+  
+  // Visualizar resumo financeiro
+  const handleViewSummary = () => {
+    handleStatementMenuClose();
+    navigate('/statements/summary');
   };
   
   return (
@@ -120,7 +204,15 @@ const AccountDetails = () => {
                   <Box sx={{ ml: 'auto' }}>
                     <Tooltip title="Atualizar">
                       <IconButton
-                        onClick={() => dispatch(fetchAccountDetails())}
+                        onClick={() => {
+                          if (accountId) {
+                            dispatch(fetchAccountById(accountId));
+                            dispatch(fetchAccountTransactions({ 
+                              accountId: accountId,
+                              params: { limit: 5 }
+                            }));
+                          }
+                        }}
                       >
                         <RefreshIcon />
                       </IconButton>
@@ -129,7 +221,7 @@ const AccountDetails = () => {
                 </Box>
                 
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={4}>
                     <Button
                       fullWidth
                       variant="contained"
@@ -137,11 +229,11 @@ const AccountDetails = () => {
                       onClick={handleTransfer}
                       size="large"
                     >
-                      Nova Transferência
+                      Transferir
                     </Button>
                   </Grid>
                   
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={4}>
                     <Button
                       fullWidth
                       variant="outlined"
@@ -149,8 +241,44 @@ const AccountDetails = () => {
                       onClick={handleViewHistory}
                       size="large"
                     >
-                      Ver Histórico
+                      Histórico
                     </Button>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={4}>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<ReceiptIcon />}
+                      onClick={handleStatementMenuOpen}
+                      size="large"
+                    >
+                      Extratos
+                    </Button>
+                    <Menu
+                      anchorEl={statementMenuAnchor}
+                      open={Boolean(statementMenuAnchor)}
+                      onClose={handleStatementMenuClose}
+                    >
+                      <MenuItem onClick={handleViewStatement}>
+                        <ListItemIcon>
+                          <HistoryIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Ver Extrato Online</ListItemText>
+                      </MenuItem>
+                      <MenuItem onClick={handleDownloadPdf}>
+                        <ListItemIcon>
+                          <PdfIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Baixar Extrato PDF</ListItemText>
+                      </MenuItem>
+                      <MenuItem onClick={handleViewSummary}>
+                        <ListItemIcon>
+                          <InfoIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Resumo Financeiro</ListItemText>
+                      </MenuItem>
+                    </Menu>
                   </Grid>
                 </Grid>
               </>
@@ -171,39 +299,27 @@ const AccountDetails = () => {
               <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
-            ) : limits ? (
+            ) : accountDetails ? (
               <List>
                 <ListItem>
                   <ListItemText
                     primary="Limite Diário"
-                    secondary={formatCurrency(limits.dailyLimit, accountDetails?.accountType)}
+                    secondary={formatCurrency(accountDetails.dailyLimit, accountDetails.accountType)}
                   />
                   <Typography color="text.secondary">
-                    Disponível: {formatCurrency(limits.dailyRemaining, accountDetails?.accountType)}
+                    Restante: {formatCurrency(accountDetails.dailyLimitRemaining, accountDetails.accountType)}
                   </Typography>
                 </ListItem>
-                
+                <Divider />
                 <ListItem>
                   <ListItemText
                     primary="Limite por Transação"
-                    secondary={formatCurrency(limits.transactionLimit, accountDetails?.accountType)}
+                    secondary={formatCurrency(accountDetails.transactionLimit, accountDetails.accountType)}
                   />
                 </ListItem>
-                
-                {limits.requiresApproval && (
-                  <ListItem>
-                    <ListItemIcon>
-                      <InfoIcon color="info" />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Aprovação Necessária"
-                      secondary={`Para transferências acima de ${formatCurrency(limits.approvalThreshold, accountDetails?.accountType)}`}
-                    />
-                  </ListItem>
-                )}
               </List>
             ) : (
-              <Typography>Nenhum limite configurado</Typography>
+              <Typography>Nenhum dado disponível</Typography>
             )}
           </Paper>
         </Grid>
@@ -211,13 +327,13 @@ const AccountDetails = () => {
         {/* Transações Recentes */}
         <Grid item xs={12}>
           <Paper elevation={2} sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">
                 Transações Recentes
               </Typography>
-              
               <Button
-                endIcon={<FileDownloadIcon />}
+                variant="text"
+                endIcon={<ArrowForwardIcon />}
                 onClick={handleViewHistory}
               >
                 Ver Todas
@@ -228,53 +344,53 @@ const AccountDetails = () => {
               <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress />
               </Box>
-            ) : recentTransactions?.length > 0 ? (
-              <List>
-                {recentTransactions.map((transaction) => (
-                  <React.Fragment key={transaction.id}>
-                    <ListItem>
-                      <ListItemIcon>
-                        {transaction.type === 'credit' ? (
-                          <TrendingUpIcon color="success" />
-                        ) : (
-                          <TrendingDownIcon color="error" />
-                        )}
-                      </ListItemIcon>
-                      
-                      <ListItemText
-                        primary={transaction.description}
-                        secondary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <ScheduleIcon fontSize="small" color="action" />
-                            {formatDate(transaction.timestamp)}
-                            {transaction.status === 'pending' && (
-                              <Chip
-                                size="small"
-                                label="Pendente"
-                                color="warning"
-                                sx={{ ml: 1 }}
-                              />
-                            )}
-                          </Box>
-                        }
-                      />
-                      
-                      <Typography
-                        variant="body1"
-                        color={transaction.type === 'credit' ? 'success.main' : 'error.main'}
-                        sx={{ fontWeight: 'bold' }}
-                      >
-                        {transaction.type === 'credit' ? '+' : '-'}
-                        {formatCurrency(transaction.amount, transaction.currency)}
-                      </Typography>
-                    </ListItem>
-                    <Divider />
-                  </React.Fragment>
-                ))}
-              </List>
+            ) : accountTransactions && accountTransactions.length > 0 ? (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Data</TableCell>
+                      <TableCell>Descrição</TableCell>
+                      <TableCell>Tipo</TableCell>
+                      <TableCell align="right">Valor</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {accountTransactions.map((transaction) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell>{formatDate(transaction.date)}</TableCell>
+                        <TableCell>{transaction.description}</TableCell>
+                        <TableCell>
+                          <Chip
+                            icon={getTransactionTypeIcon(transaction.type)}
+                            label={transaction.type}
+                            size="small"
+                            color={getTransactionTypeColor(transaction.type)}
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography
+                            color={transaction.isDebit ? 'error.main' : 'success.main'}
+                          >
+                            {transaction.isDebit ? '-' : '+'} {formatCurrency(transaction.amount, transaction.currency)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={transaction.status}
+                            size="small"
+                            color={getStatusColor(transaction.status)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             ) : (
-              <Typography color="text.secondary" align="center">
-                Nenhuma transação recente
+              <Typography align="center" color="text.secondary" sx={{ py: 3 }}>
+                Nenhuma transação recente encontrada
               </Typography>
             )}
           </Paper>
@@ -282,6 +398,48 @@ const AccountDetails = () => {
       </Grid>
     </Box>
   );
+};
+
+// Helper function para obter ícone do tipo de transação
+const getTransactionTypeIcon = (type) => {
+  switch (type.toLowerCase()) {
+    case 'deposit':
+      return <TrendingUpIcon />;
+    case 'withdrawal':
+      return <TrendingDownIcon />;
+    case 'transfer':
+      return <SwapHorizIcon />;
+    default:
+      return <ScheduleIcon />;
+  }
+};
+
+// Helper function para obter cor do tipo de transação
+const getTransactionTypeColor = (type) => {
+  switch (type.toLowerCase()) {
+    case 'deposit':
+      return 'success';
+    case 'withdrawal':
+      return 'error';
+    case 'transfer':
+      return 'info';
+    default:
+      return 'default';
+  }
+};
+
+// Helper function para obter cor do status
+const getStatusColor = (status) => {
+  switch (status.toLowerCase()) {
+    case 'completed':
+      return 'success';
+    case 'pending':
+      return 'warning';
+    case 'failed':
+      return 'error';
+    default:
+      return 'default';
+  }
 };
 
 export default AccountDetails;

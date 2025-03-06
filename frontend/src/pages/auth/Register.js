@@ -18,7 +18,8 @@ import {
   Paper,
   Divider,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Container
 } from '@mui/material';
 import { Visibility, VisibilityOff, LockOutlined, EmailOutlined, PersonOutline, PhoneOutlined } from '@mui/icons-material';
 import { register, clearError } from '../../store/slices/authSlice';
@@ -59,6 +60,9 @@ const Register = () => {
     confirmPassword: '',
     agreeTerms: ''
   });
+  
+  // Submitting state
+  const [submitting, setSubmitting] = useState(false);
   
   // Redirect if already authenticated
   useEffect(() => {
@@ -214,17 +218,33 @@ const Register = () => {
   };
   
   // Form submission
-  const handleSubmit = () => {
-    const { firstName, lastName, email, phone, password, marketingConsent } = formData;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setSubmitting(true);
     
-    dispatch(register({
-      firstName,
-      lastName,
-      email,
-      phone,
-      password,
-      marketingConsent
-    }));
+    // Validar campos
+    let errors = {};
+    
+    if (!formData.firstName) errors.firstName = 'First name is required';
+    if (!formData.lastName) errors.lastName = 'Last name is required';
+    if (!formData.email) errors.email = 'Email is required';
+    else if (!isValidEmail(formData.email)) errors.email = 'Please enter a valid email address';
+    if (!formData.password) errors.password = 'Password is required';
+    else if (!isValidPassword(formData.password)) errors.password = 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character';
+    if (!formData.confirmPassword) errors.confirmPassword = 'Please confirm your password';
+    else if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+    
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length === 0) {
+      // Simular registro bem-sucedido
+      setTimeout(() => {
+        alert(`Conta criada com sucesso! Você receberá um email em ${formData.email} para confirmar seu registro.`);
+        navigate('/login');
+      }, 1500);
+    } else {
+      setSubmitting(false);
+    }
   };
   
   // Render step content
@@ -489,62 +509,64 @@ const Register = () => {
   };
   
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography component="h1" variant="h5" gutterBottom>
-          Create Your NewCash Bank Account
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Join thousands of customers who trust NewCash Bank
-        </Typography>
-      </Box>
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-      
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      
-      {getStepContent(activeStep)}
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button
-          variant="outlined"
-          disabled={activeStep === 0 || loading}
-          onClick={handleBack}
-        >
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleNext}
-          disabled={loading}
-        >
-          {activeStep === steps.length - 1 ? (
-            loading ? <CircularProgress size={24} /> : 'Create Account'
-          ) : (
-            'Next'
-          )}
-        </Button>
-      </Box>
-      
-      <Grid container justifyContent="center" sx={{ mt: 3 }}>
-        <Grid item>
-          <Link component={RouterLink} to="/login" variant="body2">
-            Already have an account? Sign in
-          </Link>
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={{ p: 3, mt: 8 }}>
+        <Box textAlign="center" mb={3}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '60px' }} />
+          </Box>
+          <Typography variant="body1" color="text.secondary">
+            Create your account
+          </Typography>
+        </Box>
+        
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+        
+        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        
+        {getStepContent(activeStep)}
+        
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+          <Button
+            variant="outlined"
+            disabled={activeStep === 0 || loading}
+            onClick={handleBack}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleNext}
+            disabled={loading}
+          >
+            {activeStep === steps.length - 1 ? (
+              loading ? <CircularProgress size={24} /> : 'Create Account'
+            ) : (
+              'Next'
+            )}
+          </Button>
+        </Box>
+        
+        <Grid container justifyContent="center" sx={{ mt: 3 }}>
+          <Grid item>
+            <Link component={RouterLink} to="/login" variant="body2">
+              Already have an account? Sign in
+            </Link>
+          </Grid>
         </Grid>
-      </Grid>
-    </Box>
+      </Paper>
+    </Container>
   );
 };
 

@@ -28,7 +28,7 @@ import {
   Send as SendIcon
 } from '@mui/icons-material';
 import { fetchAccounts } from '../../store/slices/accountSlice';
-import { initiateTransfer } from '../../store/slices/transactionSlice';
+import { executeTransfer } from '../../store/slices/transactionSlice';
 
 const TransferFunds = () => {
   const dispatch = useDispatch();
@@ -121,7 +121,7 @@ const TransferFunds = () => {
       };
       
       try {
-        await dispatch(initiateTransfer(transferData)).unwrap();
+        await dispatch(executeTransfer(transferData)).unwrap();
         // Reset form after successful transfer
         setFormData({
           fromAccount: '',

@@ -7,6 +7,8 @@ import uiReducer from './slices/uiSlice';
 import notificationReducer from './slices/notificationSlice';
 import userReducer from './slices/userSlice';
 import settingsReducer from './slices/settingsSlice';
+import statementReducer from './slices/statementSlice';
+import adminReportReducer from './slices/adminReportSlice';
 
 const store = configureStore({
   reducer: {
@@ -18,6 +20,8 @@ const store = configureStore({
     notifications: notificationReducer,
     users: userReducer,
     settings: settingsReducer,
+    statements: statementReducer,
+    adminReports: adminReportReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

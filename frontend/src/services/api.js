@@ -1,21 +1,20 @@
-const axios = require('axios');
-const https = require('https');
+import axios from 'axios';
 
 // Configurações da API
 const API_CONFIG = {
-  BASE_URL: 'http://mytest.ftassetmanagement.com/api',
-  TOKEN: '6d9bac1b-f685-11ef-a3af-00155d010b18',
+  BASE_URL: 'https://my.ftassetmanagement.com/api',
+  TOKEN: '36bd30d0-f685-11ef-a3af-00155d010b18',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
   ACCOUNTS: {
-    USD: '42226',
-    EUR: '42227'
+    USD: '60428',
+    EUR: '60429'
   },
   ENDPOINTS: {
-    RESERVATION: '/Reservation.asp',
+    RESERVATION: '/reservation.asp',
     SEND: '/Send.asp',
-    CONFIRM: '/Reservation_confirmation.asp',
+    CONFIRM: '/reservation_confirmation.asp',
     RECEIVE: '/receiving.asp'
   }
 };
@@ -210,9 +209,6 @@ const api = axios.create({
     'Accept': 'application/json, text/plain, */*',
     'Content-Type': 'application/json'
   },
-  httpsAgent: new https.Agent({
-    rejectUnauthorized: false
-  }),
   transformResponse: [(data, headers) => {
     try {
       // Tenta fazer parse como JSON
@@ -522,7 +518,7 @@ api.interceptors.response.use(
   }
 );
 
-module.exports = {
+export {
   api,
   reservationApi,
   confirmationApi,
