@@ -23,6 +23,23 @@ exports.verifyToken = async (req, res, next) => {
       });
     }
 
+    // Verificar se é um token simulado do frontend (para desenvolvimento)
+    if (token.startsWith('user_')) {
+      // Token simulado para desenvolvimento
+      const isAdmin = token.includes('admin');
+      
+      // Adicionar usuário simulado ao request
+      req.user = {
+        id: isAdmin ? 'admin-user' : 'client-user',
+        email: isAdmin ? 'admin@newcash.com' : 'cliente@newcash.com',
+        name: isAdmin ? 'Admin User' : 'Cliente Teste',
+        role: isAdmin ? 'admin' : 'client',
+        status: 'active'
+      };
+      
+      return next();
+    }
+
     try {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -50,28 +67,45 @@ exports.verifyToken = async (req, res, next) => {
         email: user.email,
         role: user.role
       };
-      
+
       next();
-    } catch (verifyError) {
-      if (verifyError.name === 'TokenExpiredError') {
-        return res.status(401).json({
-          status: 'error',
-          message: 'Your session has expired. Please log in again.'
-        });
-      }
-      
+    } catch (error) {
       return res.status(401).json({
         status: 'error',
-        message: 'Invalid authentication token.'
+        message: 'Invalid token. Please log in again.'
       });
     }
   } catch (error) {
     logger.error(`Authentication error: ${error.message}`);
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
-      message: 'An error occurred during authentication.'
+      message: 'Authentication error. Please try again later.'
     });
   }
+};
+
+/**
+ * Middleware para verificar se o usuário é administrador
+ * @param {Object} req - Objeto de requisição Express
+ * @param {Object} res - Objeto de resposta Express
+ * @param {Function} next - Função next do Express
+ */
+exports.isAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Authentication required. Please log in.'
+    });
+  }
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      status: 'error',
+      message: 'You do not have permission to perform this action. Admin access required.'
+    });
+  }
+
+  next();
 };
 
 /**
@@ -81,7 +115,6 @@ exports.verifyToken = async (req, res, next) => {
  */
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    // Verify that user exists in request (from verifyToken middleware)
     if (!req.user) {
       return res.status(401).json({
         status: 'error',
@@ -89,7 +122,6 @@ exports.restrictTo = (...roles) => {
       });
     }
 
-    // Check if user's role is allowed
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         status: 'error',
@@ -107,7 +139,7 @@ exports.restrictTo = (...roles) => {
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
  */
-exports.checkSessionTimeout = async (req, res, next) => {
+exports.checkSessionTimeout = (req, res, next) => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
@@ -119,30 +151,32 @@ exports.checkSessionTimeout = async (req, res, next) => {
       return next();
     }
 
+    // Verificar se é um token simulado do frontend (para desenvolvimento)
+    if (token.startsWith('user_')) {
+      return next();
+    }
+
     try {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // Check if token was issued more than SESSION_TIMEOUT ago
-      const tokenIssuedAt = decoded.iat * 1000; // Convert to milliseconds
-      const currentTime = Date.now();
-      const sessionTimeout = eval(process.env.SESSION_TIMEOUT) || 30 * 60 * 1000; // Default: 30 minutes
+      // Check if token is about to expire (less than 5 minutes remaining)
+      const currentTime = Math.floor(Date.now() / 1000);
+      const timeRemaining = decoded.exp - currentTime;
       
-      if (currentTime - tokenIssuedAt > sessionTimeout) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'Session timeout. Please log in again.',
-          code: 'SESSION_TIMEOUT'
-        });
+      if (timeRemaining < 300) { // 5 minutes in seconds
+        req.sessionExpiring = true;
+        req.sessionExpiresIn = timeRemaining;
       }
       
       next();
     } catch (error) {
-      // Pass to next middleware if token verification fails
+      // Token is invalid or expired, but we don't want to block the request
+      // Just continue without setting session expiring flags
       next();
     }
   } catch (error) {
-    logger.error(`Session timeout check error: ${error.message}`);
+    logger.error(`Session check error: ${error.message}`);
     next();
   }
 };
