@@ -4,12 +4,12 @@
 # Data: 06/03/2025
 
 echo "=== Iniciando deploy simples do NewCash Bank System ==="
-echo "Este script irá configurar e iniciar o sistema em modo offline"
+echo "Este script irá configurar e iniciar o sistema em modo offline com SSL"
 
 # Instalar dependências necessárias
 echo "Instalando dependências..."
 apt-get update
-apt-get install -y nginx nodejs npm
+apt-get install -y nginx nodejs npm certbot python3-certbot-nginx
 
 # Configurar modo offline
 echo "Configurando modo offline..."
@@ -55,6 +55,10 @@ EOF
 ln -sf /etc/nginx/sites-available/newcash-bank /etc/nginx/sites-enabled/
 nginx -t && systemctl restart nginx
 
+# Configurar SSL com Let's Encrypt
+echo "Configurando SSL com Let's Encrypt..."
+certbot --nginx -d global.newcashbank.com.br --non-interactive --agree-tos --email admin@newcashbank.com.br --redirect
+
 # Iniciar o aplicativo
 echo "Iniciando o aplicativo em modo offline..."
 npm install -g pm2
@@ -64,5 +68,6 @@ pm2 startup
 
 echo "=== Deploy concluído! ==="
 echo "Sistema configurado para funcionar em modo OFFLINE (sem MongoDB)"
-echo "Acesse o sistema pelo navegador: http://global.newcashbank.com.br/"
+echo "Acesse o sistema pelo navegador: https://global.newcashbank.com.br/"
 echo "Para visualizar logs: pm2 logs newcash-bank"
+echo "O certificado SSL será renovado automaticamente pelo Certbot"
