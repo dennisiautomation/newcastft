@@ -1,6 +1,105 @@
-# Newcash Bank System
+# NewCash Bank System
 
-A complete banking system for Newcash Bank with API integration to FT Asset Management.
+Sistema bancário integrado com FT Asset Management, desenvolvido para o NewCash Bank.
+
+## Estrutura do Projeto
+
+```
+newcastft/
+├── backend/              # Servidor Node.js/Express
+│   ├── routes/          # Rotas da API
+│   ├── server.js        # Configuração do servidor
+│   └── .env            # Variáveis de ambiente
+├── frontend/            # Interface React
+│   └── build/          # Build otimizado
+└── scripts/            # Scripts de deploy
+    ├── fix-vps.sh
+    ├── fix-backend.sh
+    ├── fix-nginx.sh
+    └── fix-ssl.sh
+```
+
+## Tecnologias Utilizadas
+
+- **Backend**: Node.js + Express
+- **Frontend**: React (tema preto e branco)
+- **Servidor**: Nginx + SSL
+- **Banco de Dados**: MongoDB (modo offline disponível)
+- **API Externa**: FT Asset Management
+
+## Contas Configuradas
+
+- USD Account: 60428
+- EUR Account: 60429
+
+## Credenciais de Acesso
+
+- **Admin**:
+  - Email: admin@newcashbank.com.br
+  - Senha: admin123
+
+- **Cliente**:
+  - Email: cliente@newcashbank.com.br
+  - Senha: cliente1
+
+## Processo de Deploy
+
+1. **Preparação do Servidor**
+   ```bash
+   ./fix-vps.sh        # Configura ambiente básico
+   ./fix-backend.sh    # Configura Node.js e PM2
+   ./fix-nginx.sh      # Configura Nginx
+   ./fix-ssl.sh        # Configura HTTPS
+   ```
+
+2. **Configurações de Segurança**
+   - SSL/TLS via Let's Encrypt
+   - HTTPS forçado
+   - Headers de segurança otimizados
+   - Timeouts adequados para operações bancárias
+
+3. **Integração FT Asset Management**
+   - Rotas implementadas em `/backend/routes/ftApi.routes.js`
+   - Contas USD e EUR configuradas
+   - Endpoints de transferência e consulta
+
+4. **Monitoramento**
+   - PM2 para gestão de processos
+   - Logs do Nginx em `/var/log/nginx/`
+   - Logs do backend via PM2
+
+## Acesso ao Sistema
+
+- **Produção**: https://global.newcashbank.com.br
+- **API**: https://global.newcashbank.com.br/api
+
+## Manutenção
+
+1. **Renovação SSL**
+   - Automática via cron
+   - Verificar: `certbot renew --dry-run`
+
+2. **Logs**
+   ```bash
+   pm2 logs newcashbank-backend    # Logs do backend
+   tail -f /var/log/nginx/*.log    # Logs do Nginx
+   ```
+
+3. **Reiniciar Serviços**
+   ```bash
+   pm2 restart newcashbank-backend
+   systemctl restart nginx
+   ```
+
+## Identidade Visual
+
+- Cores: Preto e branco
+- Logo: https://newcashbank.com.br/assets/images/logo-TBMb_ZBJ.png
+- CEO: Helio Pereira (helio@newcashbank.com.br)
+
+## Suporte
+
+Para questões técnicas, contate a equipe de TI do NewCash Bank.
 
 ## Project Overview
 

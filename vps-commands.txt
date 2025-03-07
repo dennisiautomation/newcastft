@@ -1,0 +1,12 @@
+# 1. Criar diretório e configurar permissões
+mkdir -p /var/www/newcashbank
+cd /var/www/newcashbank
+
+# 2. Clonar o repositório (use HTTPS pois já está público temporariamente)
+git clone https://github.com/dennisiautomation/newcastft.git .
+
+# 3. Tornar os scripts executáveis
+chmod +x setup-vps.sh deploy-complete.sh
+
+# 4. Executar o script de setup
+./setup-vps.sh
