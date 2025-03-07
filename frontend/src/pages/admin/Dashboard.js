@@ -366,17 +366,68 @@ const AdminDashboard = () => {
   
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">{translate('Administrative Dashboard', language)}</Typography>
+      {/* Logo e Título do Dashboard */}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 3, 
+          mb: 3, 
+          bgcolor: '#000000', 
+          borderRadius: 2,
+          color: 'white',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          alignItems: 'center', 
+          width: '100%' 
+        }}>
+          <Box sx={{ 
+            mr: { xs: 0, md: 4 }, 
+            mb: { xs: 2, md: 0 },
+            textAlign: 'center'
+          }}>
+            <img 
+              src="/assets/images/logo.png" 
+              alt="NewCash Bank Logo" 
+              style={{ 
+                height: '150px', 
+                maxWidth: '100%',
+                filter: 'brightness(1.2) contrast(1.3) invert(1)'
+              }} 
+            />
+          </Box>
+          <Box>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+              {translate('Administrative Dashboard', language)}
+            </Typography>
+            <Typography variant="body1">
+              Gerencie contas, transações e monitore o status do sistema
+            </Typography>
+          </Box>
+        </Box>
         <Button
           startIcon={<RefreshIcon />}
           variant="outlined"
           onClick={loadDashboardData}
           disabled={refreshing}
+          sx={{ 
+            color: 'white', 
+            borderColor: 'white',
+            '&:hover': {
+              borderColor: 'grey.300',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+            }
+          }}
         >
           {refreshing ? translate('Updating...', language) : translate('Refresh Data', language)}
         </Button>
-      </Box>
+      </Paper>
       
       <Grid container spacing={3}>
         <Grid item xs={12} md={3}>
@@ -443,7 +494,7 @@ const AdminDashboard = () => {
                     <Typography variant="h6">{translate('General Reports', language)}</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary" paragraph>
-                    {translate('Access all administrative reports, including dashboard with general system statistics, transaction and account reports.', language)}
+                    Acesse todos os relatórios administrativos, incluindo dashboard com estatísticas gerais do sistema, relatórios de transações e contas.
                   </Typography>
                   <Button 
                     variant="contained" 
@@ -468,7 +519,7 @@ const AdminDashboard = () => {
                     <Typography variant="h6">{translate('Transaction Report', language)}</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary" paragraph>
-                    {translate('View detailed report of all transactions with advanced filters by type, status, date and value. Export to PDF.', language)}
+                    Visualize relatório detalhado de todas as transações com filtros avançados por tipo, status, data e valor. Exporte para PDF.
                   </Typography>
                   <Button 
                     variant="contained" 
@@ -493,7 +544,7 @@ const AdminDashboard = () => {
                     <Typography variant="h6">{translate('Bank Statements', language)}</Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary" paragraph>
-                    {translate('Access and manage bank statements for any account in the system. View financial summaries and download statements in PDF.', language)}
+                    Acesse e gerencie extratos bancários de qualquer conta no sistema. Visualize resumos financeiros e baixe extratos em PDF.
                   </Typography>
                   <Button 
                     variant="contained" 

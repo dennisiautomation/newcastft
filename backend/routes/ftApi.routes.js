@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
 const ftApiService = require('../services/ftApi.service');
 
 // Rota para buscar informações da conta USD
@@ -170,6 +171,137 @@ router.get('/transactions/:accountId', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+});
+
+/**
+ * @route   GET /api/ft/reservations/usd
+ * @desc    Obter todas as reservas USD pendentes
+ * @access  Admin
+ */
+router.get('/reservations/usd', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const reservations = await ftApiService.getUsdReservations();
+    res.json({
+      status: 'success',
+      data: reservations
+    });
+  } catch (error) {
+    console.error('Erro ao obter reservas USD:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Erro ao obter reservas USD',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route   GET /api/ft/reservations/eur
+ * @desc    Obter todas as reservas EUR pendentes
+ * @access  Admin
+ */
+router.get('/reservations/eur', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const reservations = await ftApiService.getEurReservations();
+    res.json({
+      status: 'success',
+      data: reservations
+    });
+  } catch (error) {
+    console.error('Erro ao obter reservas EUR:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Erro ao obter reservas EUR',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route   POST /api/ft/reservations/confirm
+ * @desc    Confirmar uma reserva (aceitar ou rejeitar)
+ * @access  Admin
+ */
+router.post('/reservations/confirm', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { refNum, status } = req.body;
+    
+    if (!refNum || !status) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'RefNum e status são obrigatórios'
+      });
+    }
+    
+    const result = await ftApiService.confirmReservation(refNum, status);
+    
+    res.json({
+      status: 'success',
+      message: `Reserva ${refNum} ${status === 'accepted' ? 'aceita' : 'rejeitada'} com sucesso`,
+      data: result
+    });
+  } catch (error) {
+    console.error('Erro ao confirmar reserva:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Erro ao confirmar reserva',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route   GET /api/ft/transfers/incoming
+ * @desc    Verificar transferências recebidas
+ * @access  Admin
+ */
+router.get('/transfers/incoming', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const transfers = await ftApiService.checkIncomingTransfers();
+    res.json({
+      status: 'success',
+      data: transfers
+    });
+  } catch (error) {
+    console.error('Erro ao verificar transferências recebidas:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Erro ao verificar transferências recebidas',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route   GET /api/ft/status
+ * @desc    Verificar status da integração com FT API
+ * @access  Admin
+ */
+router.get('/status', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    // Verificar status básico das APIs
+    const baseUrl = ftApiService.baseUrl;
+    const usdAccount = ftApiService.usdAccount;
+    const eurAccount = ftApiService.eurAccount;
+    
+    res.json({
+      status: 'success',
+      data: {
+        integrated: true,
+        baseUrl,
+        usdAccount,
+        eurAccount,
+        timestamp: new Date()
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao verificar status da FT API:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Erro ao verificar status da FT API',
+      error: error.message
+    });
+  }
 });
 
 module.exports = router;

@@ -47,7 +47,8 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { fetchAccounts } from '../../store/slices/accountSlice';
-import { fetchTransactions } from '../../store/slices/transactionSlice';
+import { fetchUserTransactions } from '../../store/slices/transactionSlice';
+import { fetchSecurityLogs } from '../../store/slices/securitySlice';
 import { useNavigate } from 'react-router-dom';
 
 // Account Card Component
@@ -65,7 +66,7 @@ const AccountCard = ({ account, onViewTransactions, onViewStatement, onViewAccou
   
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
@@ -183,6 +184,12 @@ const TransactionList = ({ transactions, loading }) => {
         return <TrendingDownIcon sx={{ color: theme.palette.error.main }} />;
       case 'transfer':
         return <CompareArrowsIcon sx={{ color: theme.palette.info.main }} />;
+      case 'receive':
+        return <TrendingUpIcon sx={{ color: theme.palette.success.main }} />;
+      case 'reservation':
+        return <AccessTimeIcon sx={{ color: theme.palette.warning.main }} />;
+      case 'confirmation':
+        return <InfoIcon sx={{ color: theme.palette.info.main }} />;
       default:
         return <PaymentIcon sx={{ color: theme.palette.primary.main }} />;
     }
@@ -191,11 +198,27 @@ const TransactionList = ({ transactions, loading }) => {
   // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('pt-BR', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
+  };
+  
+  // Format amount with positive/negative indicator and currency
+  const formatAmount = (amount, type) => {
+    const isNegative = 
+      type === 'withdrawal' || 
+      type === 'transfer' || 
+      (amount < 0);
+    
+    let displayAmount = isNegative ? amount * -1 : amount;
+    if (isNegative && amount > 0) displayAmount = amount * -1;
+    
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(displayAmount);
   };
   
   if (loading) {
@@ -257,7 +280,7 @@ const TransactionList = ({ transactions, loading }) => {
                         : 'inherit'
                   }}
                 >
-                  {transaction.type === 'deposit' ? '+' : transaction.type === 'withdrawal' ? '-' : ''}{transaction.amount}
+                  {formatAmount(transaction.amount, transaction.type)}
                 </Typography>
               </TableCell>
               <TableCell align="right">
@@ -272,6 +295,103 @@ const TransactionList = ({ transactions, loading }) => {
         </TableBody>
       </Table>
     </TableContainer>
+  );
+};
+
+// Security Log Component
+const SecurityLogList = ({ logs, loading }) => {
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!logs || logs.length === 0) {
+    return (
+      <Box sx={{ py: 2, textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          Nenhuma atividade de segurança recente encontrada.
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Helper function to get color for activity type
+  const getActivityColor = (status) => {
+    switch (status) {
+      case 'failed':
+        return 'error';
+      case 'warning':
+        return 'warning';
+      case 'success':
+        return 'success';
+      default:
+        return 'info';
+    }
+  };
+
+  // Helper function to get friendly action name
+  const getActionName = (actionType) => {
+    const actionMap = {
+      'login': 'Login',
+      'logout': 'Logout',
+      'login_failed': 'Tentativa de login',
+      'transfer_initiated': 'Transferência iniciada',
+      'transfer_completed': 'Transferência concluída',
+      'transfer_failed': 'Transferência falhou',
+      'profile_updated': 'Perfil atualizado',
+      'password_changed': 'Senha alterada',
+      'password_reset': 'Redefinição de senha',
+      'account_created': 'Conta criada',
+      'view_transactions': 'Visualização de transações',
+      'view_account': 'Visualização de conta'
+    };
+    return actionMap[actionType] || actionType;
+  };
+
+  return (
+    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+      {logs.slice(0, 5).map((log) => (
+        <ListItem
+          key={log._id}
+          alignItems="flex-start"
+          sx={{ 
+            borderLeft: `4px solid ${getActivityColor(log.status)}`,
+            mb: 1,
+            borderRadius: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.02)'
+          }}
+        >
+          <ListItemText
+            primary={getActionName(log.actionType)}
+            secondary={
+              <React.Fragment>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="text.primary"
+                >
+                  {new Date(log.createdAt).toLocaleString('pt-BR')}
+                </Typography>
+                {log.details && 
+                  <Typography component="span" variant="body2" color="text.secondary" sx={{ display: 'block' }}>
+                    {typeof log.details === 'string' ? log.details : 'Detalhes indisponíveis'}
+                  </Typography>
+                }
+              </React.Fragment>
+            }
+          />
+          <Chip 
+            label={log.status}
+            size="small"
+            color={getActivityColor(log.status)}
+            sx={{ ml: 1 }}
+          />
+        </ListItem>
+      ))}
+    </List>
   );
 };
 
@@ -305,188 +425,276 @@ const SummaryCard = ({ title, value, icon, color, trend, trendValue }) => {
 
 const ClientDashboard = () => {
   const theme = useTheme();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const { user } = useSelector((state) => state.auth);
   const { accounts, loading: accountsLoading } = useSelector((state) => state.accounts);
   const { transactions, loading: transactionsLoading } = useSelector((state) => state.transactions);
-  const { user } = useSelector((state) => state.auth);
+  const { logs, loading: logsLoading } = useSelector((state) => state.security || { logs: [], loading: false });
   
+  // Fetch data on component mount
   useEffect(() => {
     dispatch(fetchAccounts());
-    dispatch(fetchTransactions({ limit: 5 }));
+    dispatch(fetchUserTransactions({ limit: 10 }));
+    dispatch(fetchSecurityLogs({ limit: 5 }));
   }, [dispatch]);
   
-  // Handle view transactions
-  const handleViewTransactions = (accountId) => {
-    navigate(`/client/transactions?accountId=${accountId}`);
-  };
-  
-  // Handle view account details
+  // Navigation handlers
   const handleViewAccount = (accountId) => {
-    navigate(`/client/accounts/${accountId}`);
+    navigate(`/accounts/${accountId}`);
   };
   
-  // Handle view statement
+  const handleViewTransactions = (accountId) => {
+    navigate(`/transactions${accountId ? `?accountId=${accountId}` : ''}`);
+  };
+  
   const handleViewStatement = (accountId) => {
-    navigate(`/client/statements/accounts/${accountId}`);
+    navigate(`/statements/accounts/${accountId}`);
   };
   
-  // Handle view financial summary
-  const handleViewFinancialSummary = () => {
-    navigate('/client/statements/summary');
+  // Calculate summary data for accounts
+  const getTotalBalance = () => {
+    if (!accounts || accounts.length === 0) return 0;
+    return accounts.reduce((total, account) => total + account.balance, 0);
   };
   
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Dashboard</Typography>
-        <Button 
-          variant="outlined" 
-          startIcon={<AssessmentIcon />}
-          onClick={handleViewFinancialSummary}
-        >
-          Resumo Financeiro
-        </Button>
-      </Box>
-      
-      <Grid container spacing={3}>
-        {/* Welcome Card */}
-        <Grid item xs={12}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 3, 
-              bgcolor: theme.palette.primary.main, 
-              color: 'white',
-              borderRadius: 2
-            }}
-          >
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={8}>
-                <Typography variant="h5" gutterBottom>
-                  Bem-vindo(a) de volta, {user?.firstName || 'Cliente'}!
-                </Typography>
-                <Typography variant="body1">
-                  Aqui está um resumo das suas finanças. Veja suas contas, transações recentes e gerencie suas finanças.
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: 'right' }}>
-                <Button 
-                  variant="contained" 
-                  color="secondary"
-                  startIcon={<ReceiptLongIcon />}
-                  onClick={handleViewFinancialSummary}
-                  sx={{ 
-                    bgcolor: 'white', 
-                    color: theme.palette.primary.main,
-                    '&:hover': {
-                      bgcolor: theme.palette.grey[100]
-                    }
-                  }}
-                >
-                  Ver Resumo Completo
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-        
-        {/* Account Summary Section */}
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Suas Contas</Typography>
-            <Button 
-              endIcon={<ArrowForwardIcon />}
-              onClick={() => navigate('/client/accounts')}
-            >
-              Ver Todas
-            </Button>
+    <Box sx={{ flexGrow: 1, p: { xs: 2, md: 3 } }}>
+      {/* Logo e Welcome Message */}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 3, 
+          mb: 3, 
+          bgcolor: '#000000', 
+          borderRadius: 2,
+          color: 'white',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          alignItems: 'center', 
+          width: '100%' 
+        }}>
+          <Box sx={{ 
+            mr: { xs: 0, md: 4 }, 
+            mb: { xs: 2, md: 0 },
+            textAlign: 'center'
+          }}>
+            <img 
+              src="/assets/images/logo.png" 
+              alt="NewCash Bank Logo" 
+              style={{ 
+                height: '150px', 
+                maxWidth: '100%',
+                filter: 'brightness(1.2) contrast(1.3) invert(1)'
+              }} 
+            />
           </Box>
-          
+          <Box>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Olá, {user?.firstName || 'Cliente'}!
+            </Typography>
+            <Typography variant="body1">
+              Bem-vindo ao NewCash Bank. Confira seu resumo financeiro abaixo.
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+      
+      {/* Financial Summary Cards */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <SummaryCard
+            title="Saldo Total"
+            value={new Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(getTotalBalance())}
+            icon={<AccountBalanceIcon />}
+            color={theme.palette.primary.main}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <SummaryCard
+            title="Transações este mês"
+            value={transactions?.length || 0}
+            icon={<PaymentIcon />}
+            color={theme.palette.info.main}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <SummaryCard
+            title="Reservas Ativas"
+            value={0}
+            icon={<AssessmentIcon />}
+            color={theme.palette.warning.main}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <SummaryCard
+            title="Segurança"
+            value="Protegido"
+            icon={<InfoIcon />}
+            color={theme.palette.success.main}
+          />
+        </Grid>
+      </Grid>
+      
+      {/* Accounts and Quick Actions */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={8}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Minhas Contas
+          </Typography>
           {accountsLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
             </Box>
-          ) : accounts && accounts.length > 0 ? (
-            <Grid container spacing={3}>
-              {accounts.map((account) => (
-                <Grid item xs={12} sm={6} md={4} key={account.id}>
-                  <AccountCard 
-                    account={account} 
-                    onViewTransactions={handleViewTransactions}
-                    onViewStatement={handleViewStatement}
-                    onViewAccount={handleViewAccount}
-                  />
-                </Grid>
-              ))}
-            </Grid>
           ) : (
-            <Paper sx={{ p: 3, textAlign: 'center' }}>
-              <Typography color="text.secondary">
-                Nenhuma conta encontrada
-              </Typography>
-            </Paper>
+            <Grid container spacing={2}>
+              {accounts && accounts.length > 0 ? (
+                accounts.map((account) => (
+                  <Grid item xs={12} sm={6} key={account.id || account._id}>
+                    <AccountCard
+                      account={account}
+                      onViewAccount={handleViewAccount}
+                      onViewTransactions={handleViewTransactions}
+                      onViewStatement={handleViewStatement}
+                    />
+                  </Grid>
+                ))
+              ) : (
+                <Grid item xs={12}>
+                  <Paper sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography variant="body1" color="text.secondary">
+                      Você não possui contas ativas.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{ mt: 2 }}
+                      startIcon={<AddIcon />}
+                    >
+                      Abrir Nova Conta
+                    </Button>
+                  </Paper>
+                </Grid>
+              )}
+            </Grid>
           )}
         </Grid>
         
-        {/* Quick Actions */}
         <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom>
-              Ações Rápidas
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Ações Rápidas
+          </Typography>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <List>
-              <ListItem button onClick={() => navigate('/client/transfer')}>
-                <ListItemIcon>
-                  <CompareArrowsIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText primary="Nova Transferência" />
+              <ListItem disablePadding sx={{ mb: 2 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<SendToMobileIcon />}
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                  onClick={() => navigate('/transfers')}
+                >
+                  Realizar Transferência
+                </Button>
               </ListItem>
-              
-              <ListItem button onClick={() => navigate('/client/transactions')}>
-                <ListItemIcon>
-                  <AccessTimeIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText primary="Histórico de Transações" />
+              <ListItem disablePadding sx={{ mb: 2 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<ReceiptLongIcon />}
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                  onClick={() => navigate('/statements')}
+                >
+                  Ver Extrato
+                </Button>
               </ListItem>
-              
-              <ListItem button onClick={handleViewFinancialSummary}>
-                <ListItemIcon>
-                  <AssessmentIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText primary="Resumo Financeiro" />
+              <ListItem disablePadding sx={{ mb: 2 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<CreditCardIcon />}
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                  onClick={() => navigate('/reservations')}
+                >
+                  Realizar Reserva
+                </Button>
               </ListItem>
-              
-              <ListItem button onClick={() => navigate('/client/profile')}>
-                <ListItemIcon>
-                  <InfoIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText primary="Meus Dados" />
+              <ListItem disablePadding sx={{ mb: 2 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<InfoIcon />}
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                  onClick={() => navigate('/security')}
+                >
+                  Verificar Segurança
+                </Button>
               </ListItem>
             </List>
           </Paper>
         </Grid>
-        
-        {/* Recent Transactions */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={2} sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">
-                Transações Recentes
-              </Typography>
-              <Button 
-                endIcon={<ArrowForwardIcon />}
-                onClick={() => navigate('/client/transactions')}
-              >
-                Ver Todas
-              </Button>
-            </Box>
-            <TransactionList 
-              transactions={transactions} 
-              loading={transactionsLoading} 
+      </Grid>
+      
+      {/* Recent Transactions and Activity */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={7}>
+          <Card>
+            <CardHeader 
+              title="Transações Recentes" 
+              action={
+                <Button 
+                  size="small" 
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => handleViewTransactions()}
+                >
+                  Ver Todas
+                </Button>
+              }
             />
-          </Paper>
+            <Divider />
+            <CardContent>
+              <TransactionList 
+                transactions={transactions} 
+                loading={transactionsLoading} 
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} md={5}>
+          <Card>
+            <CardHeader 
+              title="Atividades de Segurança" 
+              action={
+                <Button 
+                  size="small" 
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => navigate('/security')}
+                >
+                  Ver Todas
+                </Button>
+              }
+            />
+            <Divider />
+            <CardContent>
+              <SecurityLogList 
+                logs={logs}
+                loading={logsLoading}
+              />
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Box>

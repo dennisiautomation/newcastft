@@ -32,7 +32,7 @@ const Register = () => {
   
   // Stepper state
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ['Personal Information', 'Account Security', 'Terms & Conditions'];
+  const steps = ['Informações Pessoais', 'Segurança da Conta', 'Termos e Condições'];
   
   // Form state
   const [formData, setFormData] = useState({
@@ -97,7 +97,7 @@ const Register = () => {
     }
   };
   
-  // Validate step 1: Personal Information
+  // Validate step 1: Informações Pessoais
   const validateStep1 = () => {
     let valid = true;
     const newErrors = {
@@ -109,28 +109,28 @@ const Register = () => {
     };
     
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = 'Nome é obrigatório';
       valid = false;
     }
     
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = 'Sobrenome é obrigatório';
       valid = false;
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email é obrigatório';
       valid = false;
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = 'Por favor, insira um endereço de email válido';
       valid = false;
     }
     
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
+      newErrors.phone = 'Número de telefone é obrigatório';
       valid = false;
     } else if (!isValidPhone(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number';
+      newErrors.phone = 'Por favor, insira um número de telefone válido';
       valid = false;
     }
     
@@ -138,7 +138,7 @@ const Register = () => {
     return valid;
   };
   
-  // Validate step 2: Account Security
+  // Validate step 2: Segurança da Conta
   const validateStep2 = () => {
     let valid = true;
     const newErrors = {
@@ -148,18 +148,18 @@ const Register = () => {
     };
     
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Senha é obrigatória';
       valid = false;
     } else if (!isValidPassword(formData.password)) {
-      newErrors.password = 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character';
+      newErrors.password = 'A senha deve ter pelo menos 8 caracteres e incluir pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial';
       valid = false;
     }
     
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = 'Por favor, confirme sua senha';
       valid = false;
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'As senhas não coincidem';
       valid = false;
     }
     
@@ -167,7 +167,7 @@ const Register = () => {
     return valid;
   };
   
-  // Validate step 3: Terms & Conditions
+  // Validate step 3: Termos e Condições
   const validateStep3 = () => {
     let valid = true;
     const newErrors = {
@@ -176,7 +176,7 @@ const Register = () => {
     };
     
     if (!formData.agreeTerms) {
-      newErrors.agreeTerms = 'You must agree to the terms and conditions';
+      newErrors.agreeTerms = 'Você deve concordar com os termos e condições';
       valid = false;
     }
     
@@ -225,14 +225,14 @@ const Register = () => {
     // Validar campos
     let errors = {};
     
-    if (!formData.firstName) errors.firstName = 'First name is required';
-    if (!formData.lastName) errors.lastName = 'Last name is required';
-    if (!formData.email) errors.email = 'Email is required';
-    else if (!isValidEmail(formData.email)) errors.email = 'Please enter a valid email address';
-    if (!formData.password) errors.password = 'Password is required';
-    else if (!isValidPassword(formData.password)) errors.password = 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character';
-    if (!formData.confirmPassword) errors.confirmPassword = 'Please confirm your password';
-    else if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+    if (!formData.firstName) errors.firstName = 'Nome é obrigatório';
+    if (!formData.lastName) errors.lastName = 'Sobrenome é obrigatório';
+    if (!formData.email) errors.email = 'Email é obrigatório';
+    else if (!isValidEmail(formData.email)) errors.email = 'Por favor, insira um endereço de email válido';
+    if (!formData.password) errors.password = 'Senha é obrigatória';
+    else if (!isValidPassword(formData.password)) errors.password = 'A senha deve ter pelo menos 8 caracteres e incluir pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial';
+    if (!formData.confirmPassword) errors.confirmPassword = 'Por favor, confirme sua senha';
+    else if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'As senhas não coincidem';
     
     setFormErrors(errors);
     
@@ -254,10 +254,10 @@ const Register = () => {
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Personal Information
+              Informações Pessoais
             </Typography>
             <Typography variant="body2" color="text.secondary" paragraph>
-              Please provide your personal details to create your account.
+              Por favor, forneça seus dados pessoais para criar sua conta.
             </Typography>
             
             <Grid container spacing={2}>
@@ -267,7 +267,7 @@ const Register = () => {
                   required
                   fullWidth
                   id="firstName"
-                  label="First Name"
+                  label="Nome"
                   name="firstName"
                   autoFocus
                   value={formData.firstName}
@@ -290,7 +290,7 @@ const Register = () => {
                   required
                   fullWidth
                   id="lastName"
-                  label="Last Name"
+                  label="Sobrenome"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
@@ -312,7 +312,7 @@ const Register = () => {
                   required
                   fullWidth
                   id="email"
-                  label="Email Address"
+                  label="Endereço de Email"
                   name="email"
                   autoComplete="email"
                   value={formData.email}
@@ -335,7 +335,7 @@ const Register = () => {
                   required
                   fullWidth
                   id="phone"
-                  label="Phone Number"
+                  label="Número de Telefone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
@@ -359,10 +359,10 @@ const Register = () => {
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Account Security
+              Segurança da Conta
             </Typography>
             <Typography variant="body2" color="text.secondary" paragraph>
-              Create a strong password to secure your account.
+              Crie uma senha forte para proteger sua conta bancária.
             </Typography>
             
             <TextField
@@ -370,7 +370,7 @@ const Register = () => {
               required
               fullWidth
               name="password"
-              label="Password"
+              label="Senha"
               type={showPassword ? 'text' : 'password'}
               id="password"
               value={formData.password}
@@ -403,7 +403,7 @@ const Register = () => {
               required
               fullWidth
               name="confirmPassword"
-              label="Confirm Password"
+              label="Confirmar Senha"
               type={showConfirmPassword ? 'text' : 'password'}
               id="confirmPassword"
               value={formData.confirmPassword}
@@ -433,14 +433,14 @@ const Register = () => {
             
             <Box sx={{ mt: 2, backgroundColor: 'background.paper', p: 2, borderRadius: 1 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Your password must include:
+                Sua senha deve incluir:
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                • At least 8 characters<br />
-                • At least one uppercase letter (A-Z)<br />
-                • At least one lowercase letter (a-z)<br />
-                • At least one number (0-9)<br />
-                • At least one special character (!@#$%^&*)
+                • Pelo menos 8 caracteres<br />
+                • Pelo menos uma letra maiúscula (A-Z)<br />
+                • Pelo menos uma letra minúscula (a-z)<br />
+                • Pelo menos um número (0-9)<br />
+                • Pelo menos um caractere especial (!@#$%^&*)
               </Typography>
             </Box>
           </Box>
@@ -450,23 +450,23 @@ const Register = () => {
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Terms & Conditions
+              Termos e Condições
             </Typography>
             <Typography variant="body2" color="text.secondary" paragraph>
-              Please review and accept our terms and conditions to complete your registration.
+              Leia e aceite os termos e condições para concluir seu cadastro.
             </Typography>
             
             <Paper variant="outlined" sx={{ p: 2, maxHeight: 200, overflow: 'auto', mb: 2 }}>
               <Typography variant="body2">
-                <strong>NewCash Bank Terms and Conditions</strong><br /><br />
+                <strong>Termos e Condições do NewCash Bank</strong><br /><br />
                 
-                These terms and conditions outline the rules and regulations for the use of NewCash Bank's services.<br /><br />
+                Esses termos e condições estabelecem as regras e regulamentos para o uso dos serviços do NewCash Bank.<br /><br />
                 
-                By accessing this website, we assume you accept these terms and conditions in full. Do not continue to use NewCash Bank's website if you do not accept all of the terms and conditions stated on this page.<br /><br />
+                Ao acessar este site, assumimos que você aceita esses termos e condições em sua totalidade. Não continue a usar o site do NewCash Bank se você não aceita todos os termos e condições estabelecidos nesta página.<br /><br />
                 
-                The following terminology applies to these Terms and Conditions, Privacy Statement and Disclaimer Notice, and any or all Agreements: "Client", "You" and "Your" refers to you, the person accessing this website and accepting the Company's terms and conditions. "The Company", "Ourselves", "We", "Our" and "Us", refers to NewCash Bank. "Party", "Parties", or "Us", refers to both the Client and ourselves, or either the Client or ourselves.<br /><br />
+                A seguinte terminologia se aplica a esses Termos e Condições, Declaração de Privacidade e Aviso de Isenção de Responsabilidade, e a todos os Acordos: "Cliente", "Você" e "Seu" se referem a você, a pessoa que acessa este site e aceita os termos e condições da Empresa. "A Empresa", "Nós", "Nosso" e "Nossa" se referem ao NewCash Bank. "Parte", "Partes" ou "Nós" se referem tanto ao Cliente quanto à Empresa, ou à Empresa ou ao Cliente.<br /><br />
                 
-                All terms refer to the offer, acceptance, and consideration of payment necessary to undertake the process of our assistance to the Client in the most appropriate manner, whether by formal meetings of a fixed duration, or any other means, for the express purpose of meeting the Client's needs in respect of provision of the Company's stated services/products, in accordance with and subject to, prevailing law of the United States. Any use of the above terminology or other words in the singular, plural, capitalization and/or he/she or they, are taken as interchangeable and therefore as referring to same.
+                Todos os termos se referem à oferta, aceitação e consideração de pagamento necessária para realizar o processo de nossa assistência ao Cliente da maneira mais apropriada, seja por meio de reuniões formais de duração fixa, ou por qualquer outro meio, para o propósito expresso de atender às necessidades do Cliente em relação à prestação dos serviços/produtos da Empresa, de acordo com e sujeito à, lei prevalecente dos Estados Unidos. Qualquer uso da terminologia acima ou de outras palavras no singular, plural, maiúscula e/ou minúscula, ou ele/ela, são considerados intercambiáveis e, portanto, se referem ao mesmo.
               </Typography>
             </Paper>
             
@@ -479,7 +479,7 @@ const Register = () => {
                   color="primary"
                 />
               }
-              label="I agree to the terms and conditions*"
+              label="Eu concordo com os termos e condições*"
             />
             {formErrors.agreeTerms && (
               <Typography variant="caption" color="error">
@@ -498,13 +498,13 @@ const Register = () => {
                   color="primary"
                 />
               }
-              label="I consent to receive marketing communications from NewCash Bank (optional)"
+              label="Eu desejo receber informações sobre ofertas, serviços e dicas financeiras do NewCash Bank (opcional)"
             />
           </Box>
         );
       
       default:
-        return 'Unknown step';
+        return 'Etapa desconhecida';
     }
   };
   
@@ -516,7 +516,7 @@ const Register = () => {
             <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '60px' }} />
           </Box>
           <Typography variant="body1" color="text.secondary">
-            Create your account
+            Crie sua conta
           </Typography>
         </Box>
         
@@ -542,7 +542,7 @@ const Register = () => {
             disabled={activeStep === 0 || loading}
             onClick={handleBack}
           >
-            Back
+            Voltar
           </Button>
           <Button
             variant="contained"
@@ -551,9 +551,9 @@ const Register = () => {
             disabled={loading}
           >
             {activeStep === steps.length - 1 ? (
-              loading ? <CircularProgress size={24} /> : 'Create Account'
+              loading ? <CircularProgress size={24} /> : 'Finalizar'
             ) : (
-              'Next'
+              'Continuar'
             )}
           </Button>
         </Box>
@@ -561,7 +561,7 @@ const Register = () => {
         <Grid container justifyContent="center" sx={{ mt: 3 }}>
           <Grid item>
             <Link component={RouterLink} to="/login" variant="body2">
-              Already have an account? Sign in
+              Já possui uma conta? Faça Login
             </Link>
           </Grid>
         </Grid>

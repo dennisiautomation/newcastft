@@ -1,5 +1,8 @@
+/**
+ * Servidor somente com APIs - NewCash Bank System
+ * Versão que funciona exclusivamente com as APIs de produção, sem MongoDB
+ */
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -21,7 +24,7 @@ app.use(cors());
 
 // Rate limiting to prevent abuse
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes by default
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: {
     status: 429,
@@ -84,63 +87,32 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 
-// Configuração para tentar conectar ao MongoDB primeiro, mas continuar funcionando se falhar
-const startServer = async () => {
-  // Verificar se o modo offline está ativado
-  if (process.env.MONGODB_OFFLINE_MODE === 'true') {
-    console.log('Modo offline ativado nas configurações. Iniciando servidor sem MongoDB...');
-    app.listen(PORT, () => {
-      console.log(`Servidor rodando na porta ${PORT} em modo offline (sem MongoDB)`);
-      console.log('Utilizando API FT em produção para dados em tempo real');
-    });
-    return;
-  }
-
-  try {
-    // Tentar conectar ao MongoDB
-    console.log('Tentando conectar ao MongoDB...');
-    console.log(`MongoDB URI: ${process.env.MONGODB_URI || 'mongodb://localhost:27017/newcash-bank'}`);
-    
-    // Tentar conexão com timeout mais curto
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/newcash-bank', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 3000 // Timeout mais curto (3 segundos)
-    }).catch(error => {
-      console.log(`Erro na conexão do MongoDB: ${error.message}`);
-      throw error; // Repassar o erro para o catch de fora
-    });
-    
-    console.log('MongoDB conectado com sucesso');
-    
-    // Iniciar servidor após conectar ao MongoDB
-    app.listen(PORT, () => {
-      console.log(`Servidor rodando na porta ${PORT} com MongoDB`);
-    });
-  } catch (error) {
-    // Se falhar a conexão com MongoDB, iniciar em modo offline
-    console.log(`MongoDB connection error: ${error.message}`);
-    console.log('Iniciando servidor em modo offline (sem MongoDB)...');
-    
-    // Iniciar o servidor sem esperar pelo MongoDB
-    app.listen(PORT, () => {
-      console.log(`Servidor rodando na porta ${PORT} em modo offline (sem MongoDB)`);
-      console.log('Utilizando API FT em produção para dados em tempo real');
-    });
-  }
-};
-
-// Iniciar o servidor com tratamento de exceções global
 try {
-  console.log('Iniciando aplicação NewCash Bank System...');
-  startServer();
-} catch (err) {
-  console.error('Erro fatal ao iniciar o servidor:', err);
+  // Iniciar o servidor sem MongoDB
+  console.log('Iniciando NewCash Bank System somente com APIs de produção...');
+  console.log('INFO: Este modo usa apenas as APIs da FT, sem armazenamento MongoDB');
+  console.log('Base URL FT API:', process.env.FT_API_BASE_URL || 'http://mytest.ftassetmanagement.com/api');
+  console.log('Conta USD:', process.env.USD_ACCOUNT || '60428');
+  console.log('Conta EUR:', process.env.EUR_ACCOUNT || '60429');
+
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT} (Modo somente APIs)`);
+    console.log(`Acesse o frontend em: http://localhost:${process.env.PORT || 5000}`);
+  });
+} catch (error) {
+  console.error('ERRO FATAL AO INICIAR SERVIDOR:', error.message);
+  console.error('Stack trace:', error.stack);
 }
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err.message);
+  console.error(err.stack);
 });
 
 module.exports = app; // For testing purposes

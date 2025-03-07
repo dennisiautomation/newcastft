@@ -165,6 +165,9 @@ function App() {
               </ProtectedRoute>
             } />
             
+            {/* Redirecionamento para corrigir URLs antigas */}
+            <Route path="/admin/account-statements" element={<Navigate to="/admin/reports/statements" replace />} />
+            
             {/* Novas rotas para funcionalidades ainda não implementadas */}
             <Route path="/admin/accounts" element={
               <ProtectedRoute adminOnly={true}>

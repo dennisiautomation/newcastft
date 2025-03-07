@@ -8,33 +8,6 @@ const userController = {
       status: 'success',
       data: [
         {
-          _id: 'user-001',
-          firstName: 'João',
-          lastName: 'Silva',
-          email: 'joao.silva@example.com',
-          role: 'CLIENT',
-          status: 'ACTIVE',
-          createdAt: new Date()
-        },
-        {
-          _id: 'user-002',
-          firstName: 'Maria',
-          lastName: 'Santos',
-          email: 'maria.santos@example.com',
-          role: 'CLIENT',
-          status: 'ACTIVE',
-          createdAt: new Date()
-        },
-        {
-          _id: 'user-003',
-          firstName: 'Pedro',
-          lastName: 'Oliveira',
-          email: 'pedro.oliveira@example.com',
-          role: 'CLIENT',
-          status: 'INACTIVE',
-          createdAt: new Date()
-        },
-        {
           _id: 'admin-001',
           firstName: 'Admin',
           lastName: 'User',
@@ -50,10 +23,11 @@ const userController = {
     res.json({
       status: 'success',
       data: {
-        id: '12345',
-        name: 'Test User',
-        email: 'test@example.com',
-        role: 'user',
+        id: 'admin-001',
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@newcash.com',
+        role: 'ADMIN',
         createdAt: new Date()
       }
     });
@@ -61,10 +35,10 @@ const userController = {
   updateProfile: (req, res) => {
     res.json({
       status: 'success',
-      message: 'Profile updated successfully',
+      message: 'Perfil atualizado com sucesso',
       data: {
         ...req.body,
-        id: '12345',
+        id: 'admin-001',
         updatedAt: new Date()
       }
     });

@@ -9,6 +9,7 @@ import userReducer from './slices/userSlice';
 import settingsReducer from './slices/settingsSlice';
 import statementReducer from './slices/statementSlice';
 import adminReportReducer from './slices/adminReportSlice';
+import securityReducer from './slices/securitySlice';
 
 const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ const store = configureStore({
     settings: settingsReducer,
     statements: statementReducer,
     adminReports: adminReportReducer,
+    security: securityReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

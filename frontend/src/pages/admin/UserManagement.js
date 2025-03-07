@@ -52,14 +52,6 @@ const UserManagement = () => {
       role: 'admin', 
       status: 'active',
       createdAt: '2025-01-01'
-    },
-    { 
-      id: 2, 
-      name: 'Cliente Exemplo', 
-      email: 'cliente@exemplo.com', 
-      role: 'client', 
-      status: 'active',
-      createdAt: '2025-01-15'
     }
   ];
   const loading = false;

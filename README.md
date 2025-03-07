@@ -95,25 +95,134 @@ The system integrates with the following FT Asset Management APIs:
 ### Backend Setup
 ```bash
 cd backend
-npm install
+npm install --legacy-peer-deps
 npm run start
 ```
 
 ### Frontend Setup
 ```bash
 cd frontend
-npm install
+npm install --legacy-peer-deps
 npm run start
 ```
 
-## Security Features
-- End-to-end encryption
-- Protection against SQL Injection and XSS
-- Access auditing
-- HTTPS implementation for all communications
+### Environment Variables
+The backend requires the following environment variables in a `.env` file:
+
+```
+# Server Configuration
+PORT=3001
+NODE_ENV=production
+
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/newcash-bank
+MONGODB_OFFLINE_MODE=false
+
+# JWT Configuration
+JWT_SECRET=newcash-bank-jwt-super-secret-key-2025
+JWT_EXPIRATION=24h
+
+# FT API Configuration
+FT_API_BASE_URL=https://api.ftassetmanagement.com/v1
+FT_API_KEY=your-api-key-here
+USD_ACCOUNT=123456789
+EUR_ACCOUNT=987654321
+
+# Email Configuration
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=notifications@newcash.com
+EMAIL_PASS=your-email-password
+```
+
+## Deployment
+
+For production deployment, follow these steps:
+
+1. Clone the repository
+2. Configure environment variables
+3. Build the frontend
+4. Set up MongoDB
+5. Configure Nginx as a reverse proxy
+6. Use PM2 for process management
+
+Detailed deployment instructions are available in the [DEPLOY.md](DEPLOY.md) file.
+
+### Quick Deployment
+
+For quick deployment to a VPS, you can use the provided deployment script:
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+This script will:
+- Build the frontend
+- Transfer files to the VPS
+- Set up MongoDB, Nginx, and PM2
+- Start the application
+
+## MongoDB Configuration
+
+The system requires MongoDB to be running. If you encounter connection issues, you can:
+
+1. Ensure MongoDB is installed and running:
+   ```bash
+   systemctl status mongod
+   ```
+
+2. Start MongoDB if it's not running:
+   ```bash
+   systemctl start mongod
+   ```
+
+3. Run the MongoDB setup script:
+   ```bash
+   chmod +x setup-mongodb.sh
+   ./setup-mongodb.sh
+   ```
+
+4. If necessary, enable offline mode by setting `MONGODB_OFFLINE_MODE=true` in the `.env` file.
+
+## Default Users
+
+After installation, the system comes with two default users:
+
+1. **Admin User**
+   - Email: admin@newcash.com
+   - Password: Admin@123
+
+2. **Client User**
+   - Email: cliente@newcash.com
+   - Password: Cliente@123
+
+## Troubleshooting
+
+### MongoDB Connection Issues
+If you encounter MongoDB connection errors:
+- Verify MongoDB is running
+- Check the connection string in `.env`
+- Run the `setup-mongodb.sh` script
+- Consider using offline mode temporarily
+
+### NPM Dependency Errors
+If you encounter npm dependency conflicts:
+- Use the `--legacy-peer-deps` flag with npm install
+- Update to compatible package versions
+
+## Security Considerations
+
+For production environments:
+- Change default passwords
+- Use HTTPS
+- Configure a firewall
+- Set up regular database backups
+- Rotate JWT secrets periodically
 
 ## License
-[Specify License]
+
+This project is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited.
 
 ## Contact
 [Contact Information]

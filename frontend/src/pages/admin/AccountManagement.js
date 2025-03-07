@@ -47,23 +47,23 @@ const AccountManagement = () => {
   const [accounts, setAccounts] = useState([
     { 
       id: 'ACC-001', 
-      accountNumber: '12345-6',
-      userId: 2,
-      userName: 'Cliente Exemplo',
-      userEmail: 'cliente@exemplo.com',
+      accountNumber: '60428',
+      userId: 1,
+      userName: 'Administrador',
+      userEmail: 'admin@newcashbank.com.br',
       balance: 5000.00,
-      currency: 'BRL',
+      currency: 'USD',
       status: 'active',
       createdAt: '2025-01-15'
     },
     { 
       id: 'ACC-002', 
-      accountNumber: '98765-4',
-      userId: 2,
-      userName: 'Cliente Exemplo',
-      userEmail: 'cliente@exemplo.com',
+      accountNumber: '60429',
+      userId: 1,
+      userName: 'Administrador',
+      userEmail: 'admin@newcashbank.com.br',
       balance: 15000.00,
-      currency: 'BRL',
+      currency: 'EUR',
       status: 'active',
       createdAt: '2025-02-01'
     }

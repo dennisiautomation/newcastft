@@ -173,8 +173,16 @@ const ClientLayout = ({ children }) => {
     <>
       <DrawerHeader>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', pl: 2 }}>
-          <Box sx={{ flexGrow: 1 }}>
-            <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '40px' }} />
+          <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
+            <img 
+              src="/assets/images/logo.png" 
+              alt="NewCash Bank Logo" 
+              style={{ 
+                height: '120px', 
+                maxWidth: '100%',
+                filter: 'brightness(1.1) contrast(1.2)'
+              }} 
+            />
           </Box>
           <IconButton onClick={handleDrawerToggle}>
             <ChevronLeftIcon />
@@ -189,7 +197,7 @@ const ClientLayout = ({ children }) => {
           sx={{ 
             width: 64, 
             height: 64, 
-            bgcolor: 'primary.main', 
+            bgcolor: 'black', 
             mx: 'auto',
             mb: 1
           }}
@@ -215,9 +223,9 @@ const ClientLayout = ({ children }) => {
               onClick={() => navigate(item.path)}
               sx={{
                 '&.Mui-selected': {
-                  backgroundColor: 'rgba(0, 102, 204, 0.08)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.08)',
                   '&:hover': {
-                    backgroundColor: 'rgba(0, 102, 204, 0.12)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.12)',
                   },
                   '&::before': {
                     content: '""',
@@ -226,13 +234,13 @@ const ClientLayout = ({ children }) => {
                     top: 0,
                     bottom: 0,
                     width: 4,
-                    backgroundColor: 'primary.main',
+                    backgroundColor: 'black',
                     borderRadius: '0 4px 4px 0',
                   },
                 },
               }}
             >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>
+              <ListItemIcon sx={{ color: location.pathname === item.path ? 'black' : 'inherit' }}>
                 {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.text} />
@@ -322,7 +330,7 @@ const ClientLayout = ({ children }) => {
             {/* User menu */}
             <Tooltip title="Account settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 1 }}>
-                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                <Avatar sx={{ bgcolor: 'black' }}>
                   {getUserInitials()}
                 </Avatar>
               </IconButton>

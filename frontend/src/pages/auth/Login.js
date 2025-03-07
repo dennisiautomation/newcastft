@@ -62,16 +62,16 @@ const Login = () => {
     
     // Validate email
     if (!email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email é obrigatório';
       valid = false;
     } else if (!isValidEmail(email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = 'Por favor, insira um endereço de email válido';
       valid = false;
     }
     
     // Validate password
     if (!password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Senha é obrigatória';
       valid = false;
     }
     
@@ -97,7 +97,7 @@ const Login = () => {
               <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '60px' }} />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              Sign in to access your account
+              Acesse sua conta
             </Typography>
           </Box>
           
@@ -112,7 +112,7 @@ const Login = () => {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label="Endereço de Email"
             name="email"
             autoComplete="email"
             autoFocus
@@ -135,7 +135,7 @@ const Login = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="Senha"
             type={showPassword ? 'text' : 'password'}
             id="password"
             autoComplete="current-password"
@@ -173,18 +173,18 @@ const Login = () => {
             sx={{ mt: 3, mb: 2 }}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : 'Sign In'}
+            {loading ? <CircularProgress size={24} /> : 'Entrar'}
           </Button>
           
           <Grid container justifyContent="space-between">
             <Grid item>
               <Link component={RouterLink} to="/forgot-password" variant="body2">
-                Forgot password?
+                Esqueceu a senha?
               </Link>
             </Grid>
             <Grid item>
               <Link component={RouterLink} to="/register" variant="body2">
-                {"Don't have an account? Sign Up"}
+                {"Não tem uma conta? Cadastre-se"}
               </Link>
             </Grid>
           </Grid>
@@ -192,13 +192,13 @@ const Login = () => {
           <Box sx={{ mt: 3, mb: 1 }}>
             <Divider>
               <Typography variant="caption" color="text.secondary">
-                Secure Banking
+                Serviços Bancários Seguros
               </Typography>
             </Divider>
           </Box>
           
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
-            By signing in, you agree to our Terms of Service and Privacy Policy
+            Ao fazer login, você concorda com nossos Termos de Serviço e Política de Privacidade
           </Typography>
         </Box>
       </Paper>

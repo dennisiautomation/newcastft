@@ -182,8 +182,16 @@ const AdminLayout = ({ children }) => {
     <>
       <DrawerHeader>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', pl: 2 }}>
-          <Box sx={{ flexGrow: 1 }}>
-            <img src="/assets/images/logo.png" alt="NewCash Bank Logo" style={{ height: '40px' }} />
+          <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
+            <img 
+              src="/assets/images/logo.png" 
+              alt="NewCash Bank Logo" 
+              style={{ 
+                height: '120px', 
+                maxWidth: '100%',
+                filter: 'brightness(1.1) contrast(1.2)'
+              }} 
+            />
           </Box>
           <IconButton onClick={handleDrawerToggle}>
             <ChevronLeftIcon />
@@ -261,7 +269,7 @@ const AdminLayout = ({ children }) => {
             <ListItemIcon>
               <SecurityIcon />
             </ListItemIcon>
-            <ListItemText primary="Security Logs" />
+            <ListItemText primary={translate('Security Logs', language)} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -269,7 +277,7 @@ const AdminLayout = ({ children }) => {
             <ListItemIcon>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary="Logout" />
+            <ListItemText primary={translate('Logout', language)} />
           </ListItemButton>
         </ListItem>
       </List>
@@ -311,7 +319,7 @@ const AdminLayout = ({ children }) => {
               onClick={() => navigate('/admin/accounts')}
               sx={{ mr: 1 }}
             >
-              Manage Accounts
+              {translate('Manage Accounts', language)}
             </Button>
             <Button 
               variant="outlined" 
@@ -320,7 +328,7 @@ const AdminLayout = ({ children }) => {
               startIcon={<CompareArrowsIcon />}
               onClick={() => navigate('/admin/transactions')}
             >
-              View Transactions
+              {translate('View Transactions', language)}
             </Button>
           </Box>
           
@@ -386,7 +394,7 @@ const AdminLayout = ({ children }) => {
               ))
             ) : (
               <MenuItem onClick={handleCloseNotificationsMenu}>
-                <Typography textAlign="center">No new notifications</Typography>
+                <Typography textAlign="center">{translate('No new notifications', language)}</Typography>
               </MenuItem>
             )}
           </Menu>
@@ -412,20 +420,20 @@ const AdminLayout = ({ children }) => {
               <ListItemIcon>
                 <PersonIcon fontSize="small" />
               </ListItemIcon>
-              <Typography textAlign="center">Profile</Typography>
+              <Typography textAlign="center">{translate('Profile', language)}</Typography>
             </MenuItem>
             <MenuItem onClick={() => { navigate('/admin/settings'); handleCloseUserMenu(); }}>
               <ListItemIcon>
                 <SettingsIcon fontSize="small" />
               </ListItemIcon>
-              <Typography textAlign="center">Settings</Typography>
+              <Typography textAlign="center">{translate('Settings', language)}</Typography>
             </MenuItem>
             <Divider />
             <MenuItem onClick={() => { handleLogout(); handleCloseUserMenu(); }}>
               <ListItemIcon>
                 <LogoutIcon fontSize="small" />
               </ListItemIcon>
-              <Typography textAlign="center">Logout</Typography>
+              <Typography textAlign="center">{translate('Logout', language)}</Typography>
             </MenuItem>
           </Menu>
         </Toolbar>

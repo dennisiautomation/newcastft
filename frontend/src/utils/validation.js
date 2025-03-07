@@ -71,8 +71,9 @@ export const isValidPassword = (password) => {
  * @returns {boolean} True if phone format is valid
  */
 export const isValidPhone = (phone) => {
-  // Allow formats like +1234567890, 123-456-7890, (123) 456-7890, etc.
-  const phoneRegex = /^(\+\d{1,3})?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
+  // Aceita formatos brasileiros como (11) 98765-4321, 11987654321, etc.
+  // Também aceita formatos internacionais como +55 11 98765-4321
+  const phoneRegex = /^(\+?55)?[-.\s]?(?:\(?([1-9][0-9])\)?[-.\s]?)?(?:9[-.\s]?)?([0-9]{4})[-.\s]?([0-9]{4})$/;
   return phoneRegex.test(phone);
 };
 

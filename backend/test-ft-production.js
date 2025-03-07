@@ -10,8 +10,8 @@ const https = require('https');
 dotenv.config();
 
 // Configurações da API FT (usando as URLs de produção)
-const baseUrl = process.env.FT_API_BASE_URL || 'https://my.ftassetmanagement.com/api';
-const apiKey = process.env.FT_API_KEY || '36bd30d0-f685-11ef-a3af-00155d010b18';
+const baseUrl = process.env.FT_API_BASE_URL || 'http://mytest.ftassetmanagement.com/api';
+const apiKey = process.env.FT_API_KEY || '6d9bac1b-f685-11ef-a3af-00155d010b18';
 const usdAccount = process.env.USD_ACCOUNT || '60428';
 const eurAccount = process.env.EUR_ACCOUNT || '60429';
 
