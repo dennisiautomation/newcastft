@@ -4,22 +4,28 @@
 # Data: 06/03/2025
 
 echo "=== Iniciando deploy simples do NewCash Bank System ==="
-echo "Este script irá configurar e iniciar o sistema em modo offline"
+echo "Este script irá configurar e iniciar o sistema com MongoDB Atlas"
 
 # Instalar dependências necessárias
 echo "Instalando dependências..."
 apt-get update
 apt-get install -y nginx nodejs npm
 
-# Configurar modo offline
-echo "Configurando modo offline..."
+# Configurar MongoDB Atlas
+echo "Configurando conexão com MongoDB Atlas..."
 mkdir -p backend
 if [ ! -f backend/.env ]; then
     echo "Criando arquivo .env..."
     touch backend/.env
 fi
-echo "MONGODB_OFFLINE_MODE=true" >> backend/.env
-echo "MONGODB_URI=mongodb://localhost:27017/newcash" >> backend/.env
+
+# Usar MongoDB Atlas - serviço de banco de dados MongoDB na nuvem
+# Esta é uma string de conexão de exemplo. Você deve substituí-la pela sua própria
+# string de conexão do MongoDB Atlas.
+echo "MONGODB_URI=mongodb+srv://newcash:NewCash2025@cluster0.mongodb.net/newcash?retryWrites=true&w=majority" > backend/.env
+echo "MONGODB_OFFLINE_MODE=false" >> backend/.env
+echo "JWT_SECRET=newcash-bank-system-secret-key" >> backend/.env
+echo "PORT=3001" >> backend/.env
 
 # Instalar dependências do projeto
 echo "Instalando dependências do projeto..."
@@ -54,13 +60,15 @@ ln -sf /etc/nginx/sites-available/newcash-bank /etc/nginx/sites-enabled/
 nginx -t && systemctl restart nginx
 
 # Iniciar o aplicativo
-echo "Iniciando o aplicativo em modo offline..."
+echo "Iniciando o aplicativo com MongoDB Atlas..."
 npm install -g pm2
 pm2 start start-production.js --name newcash-bank
 pm2 save
 pm2 startup
 
 echo "=== Deploy concluído! ==="
-echo "Sistema configurado para funcionar em modo OFFLINE (sem MongoDB)"
+echo "Sistema configurado para usar MongoDB Atlas (banco de dados na nuvem)"
+echo "IMPORTANTE: Você precisa criar uma conta no MongoDB Atlas e substituir a string de conexão"
+echo "no arquivo backend/.env pela sua própria string de conexão."
 echo "Acesse o sistema pelo navegador: http://$(hostname -I | awk '{print $1}')"
 echo "Para visualizar logs: pm2 logs newcash-bank"
