@@ -34,7 +34,7 @@ echo "Configurando Nginx..."
 cat > /etc/nginx/sites-available/newcash-bank << EOF
 server {
     listen 80;
-    server_name _;
+    server_name global.newcashbank.com.br;
     
     location / {
         root $(pwd)/frontend/build;
@@ -64,5 +64,5 @@ pm2 startup
 
 echo "=== Deploy concluído! ==="
 echo "Sistema configurado para funcionar em modo OFFLINE (sem MongoDB)"
-echo "Acesse o sistema pelo navegador: http://$(hostname -I | awk '{print $1}')"
+echo "Acesse o sistema pelo navegador: http://global.newcashbank.com.br/"
 echo "Para visualizar logs: pm2 logs newcash-bank"
