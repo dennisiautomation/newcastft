@@ -49,7 +49,7 @@ import {
   clearTransactionError
 } from '../../store/slices/adminReportSlice';
 
-const AdminTransactionReport = () => {
+const TransactionReport = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   
@@ -500,4 +500,4 @@ const AdminTransactionReport = () => {
   );
 };
 
-export default AdminTransactionReport;
+export default TransactionReport;

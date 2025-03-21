@@ -54,9 +54,13 @@ export const login = createAsyncThunk(
       // Credenciais fixas para garantir acesso
       if (
         (credentials.email === 'admin@newcash.com' && credentials.password === 'Admin@123') ||
-        (credentials.email === 'cliente@newcash.com' && credentials.password === 'Cliente@123')
+        (credentials.email === 'cliente@newcash.com' && credentials.password === 'Cliente@123') ||
+        (credentials.email === 'admin@newcashbank.com.br' && credentials.password === 'admin123') ||
+        (credentials.email === 'cliente@newcashbank.com.br' && credentials.password === 'cliente1') ||
+        (credentials.email === 'shigemi.matsumoto@newcashbank.com.br' && credentials.password === 'Eriyasu2023!')
       ) {
-        const isAdmin = credentials.email === 'admin@newcash.com';
+        const isAdmin = credentials.email === 'admin@newcash.com' || credentials.email === 'admin@newcashbank.com.br';
+        const isJapaneseClient = credentials.email === 'shigemi.matsumoto@newcashbank.com.br';
         
         // Gerar token simulado
         const token = `user_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
@@ -69,13 +73,25 @@ export const login = createAsyncThunk(
         // Retornar dados do usuário
         return {
           user: {
-            id: isAdmin ? 'admin-user' : 'client-user',
+            id: isAdmin ? 'admin-user' : (isJapaneseClient ? 'japanese-client' : 'client-user'),
             email: credentials.email,
-            name: isAdmin ? 'Admin User' : 'Cliente Teste',
+            name: isAdmin ? 'Admin User' : (isJapaneseClient ? 'SHIGEMI MATSUMOTO' : 'Cliente Teste'),
             role: isAdmin ? 'admin' : 'client',
             status: 'active',
             createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString()
+            lastLogin: new Date().toISOString(),
+            companyInfo: isJapaneseClient ? {
+              name: "ERIYASU.CO.LTD", 
+              legalName: "ERIYASU.CO.JP",
+              address: "6-14 Matsuyamachi Station Building 6B, Chuo-ku, Osaka",
+              country: "JAPAN",
+              registerNumber: "1200-01-233046"
+            } : null,
+            accountInfo: isJapaneseClient ? {
+              accountNumber: "778908",
+              type: "CORPORATE",
+              currency: ["USD", "EUR"]
+            } : null
           },
           token: token,
           refreshToken: refreshToken

@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
  * Redireciona para a página de login se o usuário não estiver autenticado
  * Aceita children como props para renderizar o conteúdo protegido
  */
-const ProtectedRoute = ({ children, adminOnly = false }) => {
+const ProtectedRoute = ({ children, adminOnly = false, requiredRole = null }) => {
   const { isAuthenticated, loading, user } = useSelector(state => state.auth);
 
   // Se ainda estiver carregando, mostra um indicador de carregamento
@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   }
 
   // Se a rota requer privilégios de administrador e o usuário não é admin, redireciona
-  if (adminOnly && user?.role !== 'admin') {
+  if ((adminOnly || requiredRole === 'admin') && user?.role !== 'admin') {
     return <Navigate to="/dashboard" />;
   }
 

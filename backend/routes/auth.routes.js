@@ -1,6 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/auth.controller');
+let authController;
+
+// Tentar conectar ao MongoDB
+try {
+  const mongoose = require('mongoose');
+  mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  authController = require('../controllers/auth.controller');
+  console.log('Usando controlador de autenticação padrão (MongoDB)');
+} catch (error) {
+  // Se não conseguir conectar, usar controlador mock
+  authController = require('../controllers/auth.mock.controller');
+  console.log('Usando controlador de autenticação mock (offline mode)');
+}
+
 const { verifyToken } = require('../middleware/auth.middleware');
 const userActivityMiddleware = require('../middleware/user-activity.middleware');
 

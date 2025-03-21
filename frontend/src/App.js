@@ -19,22 +19,17 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ClientDashboard from './pages/client/Dashboard';
-import AccountDetails from './pages/client/AccountDetails';
-import TransferFunds from './pages/client/TransferFunds';
 import Profile from './pages/client/Profile';
-import TransactionHistory from './pages/client/TransactionHistory';
-import NotFound from './pages/common/NotFound';
+import MyAccount from './pages/client/MyAccount';
+import Transfers from './pages/client/Transfers';
+import Transactions from './pages/client/Transactions';
 import AdminDashboard from './pages/admin/Dashboard';
-import MyAccount from './pages/admin/MyAccount';
-import ClientTransactions from './pages/admin/ClientTransactions';
-import AdminReports from './pages/admin/AdminReports';
-import TransactionsReport from './pages/admin/TransactionsReport';
-import AccountStatements from './pages/admin/AccountStatements';
-import AccountManagement from './pages/admin/AccountManagement';
 import UserManagement from './pages/admin/UserManagement';
-import TransactionMonitoring from './pages/admin/TransactionMonitoring';
-import SystemSettings from './pages/admin/SystemSettings';
+import AccountManagement from './pages/admin/AccountManagement';
 import TransactionReport from './pages/admin/TransactionReport';
+import TransactionsReport from './pages/admin/TransactionsReport';
+import SystemSettings from './pages/admin/SystemSettings';
+import NotFound from './pages/common/NotFound';
 
 // Componentes
 import Layout from './components/layout/Layout';
@@ -46,7 +41,7 @@ import { fetchUserPreferences } from './store/slices/userSlice';
 
 function App() {
   const dispatch = useDispatch();
-  const { isAuthenticated, loading } = useSelector(state => state.auth);
+  const { isAuthenticated, loading, user } = useSelector(state => state.auth);
   const userState = useSelector(state => state.user);
   const darkMode = userState?.preferences?.darkMode || false;
 
@@ -84,20 +79,6 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/accounts/:accountId" element={
-              <ProtectedRoute>
-                <Layout>
-                  <AccountDetails />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/transfers" element={
-              <ProtectedRoute>
-                <Layout>
-                  <TransferFunds />
-                </Layout>
-              </ProtectedRoute>
-            } />
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Layout>
@@ -105,110 +86,83 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/account" element={
+            <Route path="/my-account" element={
               <ProtectedRoute>
                 <Layout>
                   <MyAccount />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/transfers" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Transfers />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/transactions" element={
               <ProtectedRoute>
                 <Layout>
-                  <TransactionHistory />
+                  <Transactions />
                 </Layout>
               </ProtectedRoute>
             } />
             
-            {/* Rotas protegidas para administradores */}
-            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="/admin/dashboard" element={
-              <ProtectedRoute adminOnly={true}>
+            {/* Rotas de Administrador */}
+            <Route path="/admin" element={
+              <ProtectedRoute requiredRole="admin">
                 <Layout>
                   <AdminDashboard />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/admin/my-account" element={
-              <ProtectedRoute adminOnly={true}>
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute requiredRole="admin">
                 <Layout>
-                  <MyAccount />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/client-transactions" element={
-              <ProtectedRoute adminOnly={true}>
-                <Layout>
-                  <ClientTransactions />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/reports" element={
-              <ProtectedRoute adminOnly={true}>
-                <Layout>
-                  <AdminReports />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/reports/transactions" element={
-              <ProtectedRoute adminOnly={true}>
-                <Layout>
-                  <TransactionsReport />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/reports/statements" element={
-              <ProtectedRoute adminOnly={true}>
-                <Layout>
-                  <AccountStatements />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            
-            {/* Redirecionamento para corrigir URLs antigas */}
-            <Route path="/admin/account-statements" element={<Navigate to="/admin/reports/statements" replace />} />
-            
-            {/* Novas rotas para funcionalidades ainda não implementadas */}
-            <Route path="/admin/accounts" element={
-              <ProtectedRoute adminOnly={true}>
-                <Layout>
-                  <AccountManagement />
+                  <AdminDashboard />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/users" element={
-              <ProtectedRoute adminOnly={true}>
+              <ProtectedRoute requiredRole="admin">
                 <Layout>
                   <UserManagement />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/admin/transactions" element={
-              <ProtectedRoute adminOnly={true}>
+            <Route path="/admin/accounts" element={
+              <ProtectedRoute requiredRole="admin">
                 <Layout>
-                  <TransactionMonitoring />
+                  <AccountManagement />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/admin/settings" element={
-              <ProtectedRoute adminOnly={true}>
-                <Layout>
-                  <SystemSettings />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/reports/transaction-report" element={
-              <ProtectedRoute adminOnly={true}>
+            <Route path="/admin/transaction-report" element={
+              <ProtectedRoute requiredRole="admin">
                 <Layout>
                   <TransactionReport />
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/admin/transactions-report" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <TransactionsReport />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <SystemSettings />
+                </Layout>
+              </ProtectedRoute>
+            } />
             
-            {/* Página 404 */}
+            {/* Página não encontrada */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <ToastContainer position="bottom-right" autoClose={5000} hideProgressBar={false} />
+          <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
         </LocalizationProvider>
       </ThemeProvider>
     </LanguageProvider>
