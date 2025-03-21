@@ -30,13 +30,16 @@ export const authSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
     logout: (state) => {
       return initialState;
     },
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout, clearError } = authSlice.actions;
 
 // Mock login action para desenvolvimento offline
 export const mockLogin = (credentials) => (dispatch) => {
@@ -82,18 +85,14 @@ export const mockLogin = (credentials) => (dispatch) => {
   }
 };
 
-// IMPORTANTE: Função renomeada de checkAuthState para checkAuthStatus para manter compatibilidade
+// Função para verificar o status de autenticação
 export const checkAuthStatus = () => (dispatch) => {
   const token = localStorage.getItem('token');
   const storedUser = localStorage.getItem('user');
   
   if (token && storedUser) {
     try {
-      // Verifica se o token é válido (não expirado)
       const user = JSON.parse(storedUser);
-      
-      // Em produção, você deve verificar a validade do token
-      // com o backend ou decodificar e verificar a expiração
       
       dispatch(loginSuccess({
         token,
