@@ -61,23 +61,20 @@ export const mockLogin = (credentials) => (dispatch) => {
   dispatch(loginStart());
   
   try {
-    // Simulação de verificação de credenciais para testes offline
-    if (
-      (credentials.email === 'admin@newcashbank.com.br' && credentials.password === 'admin123') ||
-      (credentials.email === 'shigemi.matsumoto@newcashbank.com.br' && credentials.password === 'Eriyasu2023!')
-    ) {
-      const role = credentials.email.includes('admin') ? 'ADMIN' : 'CLIENT';
-      const name = credentials.email.includes('admin') 
-        ? 'ADMINISTRATOR' 
-        : 'SHIGEMI MATSUMOTO';
-      
-      const token = 'mock-jwt-token';
+    console.log("Tentando login com:", credentials.email);
+    
+    // Credenciais específicas para cliente e admin
+    if (credentials.email === 'admin@newcashbank.com.br' && credentials.password === 'admin123') {
+      // Admin login
+      const token = 'mock-jwt-token-admin';
       const user = {
-        id: role === 'ADMIN' ? 'admin-001' : 'client-002',
-        email: credentials.email,
-        name: name,
-        role: role,
+        id: 'admin-001',
+        email: 'admin@newcashbank.com.br',
+        name: 'ADMINISTRATOR',
+        role: 'ADMIN'
       };
+      
+      console.log("Login de admin aceito");
       
       // Simulação de delay de rede (500ms)
       setTimeout(() => {
@@ -87,15 +84,43 @@ export const mockLogin = (credentials) => (dispatch) => {
         dispatch(loginSuccess({
           token,
           user,
-          welcomeMessage: `Bem-vindo(a), ${name}`,
+          welcomeMessage: `Bem-vindo(a), ${user.name}`,
+        }));
+      }, 500);
+      
+      return;
+    } 
+    else if (credentials.email === 'shigemi.matsumoto@newcashbank.com.br' && credentials.password === 'Eriyasu2023!') {
+      // Cliente login
+      const token = 'mock-jwt-token-client';
+      const user = {
+        id: 'client-002',
+        email: 'shigemi.matsumoto@newcashbank.com.br',
+        name: 'SHIGEMI MATSUMOTO',
+        role: 'CLIENT'
+      };
+      
+      console.log("Login de cliente aceito");
+      
+      // Simulação de delay de rede (500ms)
+      setTimeout(() => {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        dispatch(loginSuccess({
+          token,
+          user,
+          welcomeMessage: `Bem-vindo(a), ${user.name}`,
         }));
       }, 500);
       
       return;
     }
     
-    dispatch(loginFailure('Login failed'));
+    console.log("Login falhou: credenciais inválidas");
+    dispatch(loginFailure('Credenciais inválidas'));
   } catch (error) {
+    console.error("Erro no login:", error);
     dispatch(loginFailure(error.message));
   }
 };
