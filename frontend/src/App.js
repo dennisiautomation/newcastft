@@ -70,37 +70,40 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
+            {/* Redirecionamento da raiz */}
+            <Route path="/" element={<Navigate to={user?.role === 'ADMIN' ? "/admin/dashboard" : "/client/dashboard"} replace />} />
+            
             {/* Rotas protegidas para clientes */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={
+            <Route path="/dashboard" element={<Navigate to="/client/dashboard" replace />} />
+            <Route path="/client/dashboard" element={
               <ProtectedRoute>
                 <Layout>
                   <ClientDashboard />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/profile" element={
+            <Route path="/client/profile" element={
               <ProtectedRoute>
                 <Layout>
                   <Profile />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/my-account" element={
+            <Route path="/client/my-account" element={
               <ProtectedRoute>
                 <Layout>
                   <MyAccount />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/transfers" element={
+            <Route path="/client/transfers" element={
               <ProtectedRoute>
                 <Layout>
                   <Transfers />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/transactions" element={
+            <Route path="/client/transactions" element={
               <ProtectedRoute>
                 <Layout>
                   <Transactions />
@@ -108,51 +111,57 @@ function App() {
               </ProtectedRoute>
             } />
             
+            {/* Retrocompatibilidade com rotas antigas */}
+            <Route path="/profile" element={<Navigate to="/client/profile" replace />} />
+            <Route path="/my-account" element={<Navigate to="/client/my-account" replace />} />
+            <Route path="/transfers" element={<Navigate to="/client/transfers" replace />} />
+            <Route path="/transactions" element={<Navigate to="/client/transactions" replace />} />
+            
             {/* Rotas de Administrador */}
             <Route path="/admin" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="ADMIN">
                 <Layout>
                   <AdminDashboard />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/dashboard" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="ADMIN">
                 <Layout>
                   <AdminDashboard />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/users" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="ADMIN">
                 <Layout>
                   <UserManagement />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/accounts" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="ADMIN">
                 <Layout>
                   <AccountManagement />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/transaction-report" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="ADMIN">
                 <Layout>
                   <TransactionReport />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/transactions-report" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="ADMIN">
                 <Layout>
                   <TransactionsReport />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/admin/settings" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="ADMIN">
                 <Layout>
                   <SystemSettings />
                 </Layout>

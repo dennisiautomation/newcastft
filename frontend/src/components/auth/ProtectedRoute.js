@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children, adminOnly = false, requiredRole = null }) =>
   }
 
   // Se a rota requer privilégios de administrador e o usuário não é admin, redireciona
-  if ((adminOnly || requiredRole === 'admin') && user?.role !== 'admin') {
+  if ((adminOnly || requiredRole === 'ADMIN') && user?.role !== 'ADMIN') {
     return <Navigate to="/dashboard" />;
   }
 
