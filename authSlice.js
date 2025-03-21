@@ -33,13 +33,23 @@ export const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updateProfileSuccess: (state, action) => {
+      state.user = { ...state.user, ...action.payload };
+    },
     logout: (state) => {
       return initialState;
     },
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout, clearError } = authSlice.actions;
+export const { 
+  loginStart, 
+  loginSuccess, 
+  loginFailure, 
+  logout, 
+  clearError,
+  updateProfileSuccess 
+} = authSlice.actions;
 
 // Mock login action para desenvolvimento offline
 export const mockLogin = (credentials) => (dispatch) => {
@@ -103,6 +113,19 @@ export const checkAuthStatus = () => (dispatch) => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     }
+  }
+};
+
+// Função para atualizar o perfil do usuário
+export const updateProfile = (profileData) => (dispatch) => {
+  try {
+    // Em um ambiente real, isso enviaria uma solicitação para atualizar os dados
+    // Aqui apenas simulamos a atualização com sucesso
+    dispatch(updateProfileSuccess(profileData));
+    return { success: true };
+  } catch (error) {
+    dispatch(loginFailure(error.message));
+    return { success: false, error: error.message };
   }
 };
 
