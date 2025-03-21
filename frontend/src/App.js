@@ -71,51 +71,49 @@ function App() {
             <Route path="/register" element={<Register />} />
             
             {/* Redirecionamento da raiz */}
-            <Route path="/" element={<Navigate to={user?.role === 'ADMIN' ? "/admin/dashboard" : "/client/dashboard"} replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             
             {/* Rotas protegidas para clientes */}
-            <Route path="/dashboard" element={<Navigate to="/client/dashboard" replace />} />
-            <Route path="/client/dashboard" element={
+            <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>
                   <ClientDashboard />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/client/profile" element={
+            <Route path="/client/dashboard" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/profile" element={
               <ProtectedRoute>
                 <Layout>
                   <Profile />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/client/my-account" element={
+            <Route path="/client/profile" element={<Navigate to="/profile" replace />} />
+            <Route path="/my-account" element={
               <ProtectedRoute>
                 <Layout>
                   <MyAccount />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/client/transfers" element={
+            <Route path="/client/my-account" element={<Navigate to="/my-account" replace />} />
+            <Route path="/transfers" element={
               <ProtectedRoute>
                 <Layout>
                   <Transfers />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/client/transactions" element={
+            <Route path="/client/transfers" element={<Navigate to="/transfers" replace />} />
+            <Route path="/transactions" element={
               <ProtectedRoute>
                 <Layout>
                   <Transactions />
                 </Layout>
               </ProtectedRoute>
             } />
-            
-            {/* Retrocompatibilidade com rotas antigas */}
-            <Route path="/profile" element={<Navigate to="/client/profile" replace />} />
-            <Route path="/my-account" element={<Navigate to="/client/my-account" replace />} />
-            <Route path="/transfers" element={<Navigate to="/client/transfers" replace />} />
-            <Route path="/transactions" element={<Navigate to="/client/transactions" replace />} />
+            <Route path="/client/transactions" element={<Navigate to="/transactions" replace />} />
             
             {/* Rotas de Administrador */}
             <Route path="/admin" element={
