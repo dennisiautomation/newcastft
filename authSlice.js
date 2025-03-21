@@ -82,4 +82,29 @@ export const mockLogin = (credentials) => (dispatch) => {
   }
 };
 
+// IMPORTANTE: Função renomeada de checkAuthState para checkAuthStatus para manter compatibilidade
+export const checkAuthStatus = () => (dispatch) => {
+  const token = localStorage.getItem('token');
+  const storedUser = localStorage.getItem('user');
+  
+  if (token && storedUser) {
+    try {
+      // Verifica se o token é válido (não expirado)
+      const user = JSON.parse(storedUser);
+      
+      // Em produção, você deve verificar a validade do token
+      // com o backend ou decodificar e verificar a expiração
+      
+      dispatch(loginSuccess({
+        token,
+        user,
+        welcomeMessage: '',
+      }));
+    } catch (error) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+  }
+};
+
 export default authSlice.reducer;
