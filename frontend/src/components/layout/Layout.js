@@ -12,24 +12,29 @@ const Layout = ({ children }) => {
   const { user, isAuthenticated } = useSelector(state => state.auth);
   const location = useLocation();
   
-  // Verifica se estamos em uma rota de administrador
-  const isAdminRoute = location.pathname.startsWith('/admin');
-
-  // Verifica se estamos em uma rota de cliente
-  const isClientRoute = location.pathname.startsWith('/client');
+  console.log("Current user:", user);
+  console.log("Current path:", location.pathname);
   
   // Verifica se o usuário existe antes de acessar suas propriedades
   if (!isAuthenticated || !user) {
     // Renderiza um layout básico ou redireciona para login
     return <div className="loading-container">{children}</div>;
   }
+
+  // Se o caminho começa com /admin, sempre use o AdminLayout
+  if (location.pathname.startsWith('/admin')) {
+    console.log("Using admin layout due to path");
+    return <AdminLayout>{children}</AdminLayout>;
+  }
   
-  // Renderiza o layout apropriado com base no papel do usuário e na rota atual
-  if (user.role === 'ADMIN' && (isAdminRoute || !isClientRoute)) {
+  // Se o usuário é ADMIN, use AdminLayout
+  if (user.role === 'ADMIN') {
+    console.log("Using admin layout due to role");
     return <AdminLayout>{children}</AdminLayout>;
   }
   
   // Para usuários comuns
+  console.log("Using client layout");
   return <ClientLayout>{children}</ClientLayout>;
 };
 
