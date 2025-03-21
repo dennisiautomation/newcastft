@@ -143,11 +143,11 @@ const ClientLayout = ({ children }) => {
   
   // Navigation items
   const navItems = [
-    { text: translate('Dashboard', language), icon: <DashboardIcon />, path: '/dashboard' },
-    { text: translate('My Account', language), icon: <AccountBoxIcon />, path: '/my-account' },
-    { text: translate('Transfer Funds', language), icon: <SendIcon />, path: '/transfers' },
-    { text: translate('Transaction History', language), icon: <ListAltIcon />, path: '/transactions' },
-    { text: translate('Profile', language), icon: <PersonIcon />, path: '/profile' },
+    { text: translate('Dashboard', language), icon: <DashboardIcon />, path: '/client/dashboard' },
+    { text: translate('My Account', language), icon: <AccountBoxIcon />, path: '/client/my-account' },
+    { text: translate('Transfer Funds', language), icon: <SendIcon />, path: '/client/transfers' },
+    { text: translate('Transaction History', language), icon: <ListAltIcon />, path: '/client/transactions' },
+    { text: translate('Profile', language), icon: <PersonIcon />, path: '/client/profile' },
   ];
   
   // Format user's name for display

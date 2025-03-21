@@ -1,4 +1,22 @@
-import React from 'react';
+# No servidor
+cd /var/www/newcashbank/frontend/src/store/slices/
+cat authSlice.js | grep -A 15 'shigemi.matsumoto'
+
+# Ou verificar arquivos de mock no backend
+cd /var/www/newcashbank/backend
+find . -name "*.js" -exec grep -l "shigemi.matsumoto" {} \;# No servidor
+cd /var/www/newcashbank/frontend/src/store/slices/
+cat authSlice.js | grep -A 15 'shigemi.matsumoto'
+
+# Ou verificar arquivos de mock no backend
+cd /var/www/newcashbank/backend
+find . -name "*.js" -exec grep -l "shigemi.matsumoto" {} \;# No servidor
+cd /var/www/newcashbank/frontend/src/store/slices/
+cat authSlice.js | grep -A 15 'shigemi.matsumoto'
+
+# Ou verificar arquivos de mock no backend
+cd /var/www/newcashbank/backend
+find . -name "*.js" -exec grep -l "shigemi.matsumoto" {} \;import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import AdminLayout from '../../layouts/AdminLayout';
@@ -22,7 +40,7 @@ const Layout = ({ children }) => {
   }
   
   // Renderiza o layout apropriado com base no papel do usuário e na rota atual
-  if (user.role === 'admin' || isAdminRoute) {
+  if (user.role === 'ADMIN' || isAdminRoute) {
     return <AdminLayout>{children}</AdminLayout>;
   }
   
