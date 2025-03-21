@@ -71,15 +71,19 @@ function App() {
             <Route path="/register" element={<Register />} />
             
             {/* Redirecionamento da raiz */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={
+              <Navigate to={user?.role === 'ADMIN' ? "/admin/dashboard" : "/dashboard"} replace />
+            } />
             
-            {/* Rotas protegidas para clientes */}
+            {/* Redirecionamento específico do dashboard */}
             <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Layout>
-                  <ClientDashboard />
-                </Layout>
-              </ProtectedRoute>
+              user?.role === 'ADMIN' 
+                ? <Navigate to="/admin/dashboard" replace /> 
+                : <ProtectedRoute>
+                    <Layout>
+                      <ClientDashboard />
+                    </Layout>
+                  </ProtectedRoute>
             } />
             <Route path="/client/dashboard" element={<Navigate to="/dashboard" replace />} />
             <Route path="/profile" element={
