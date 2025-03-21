@@ -36,6 +36,10 @@ export const authSlice = createSlice({
     updateProfileSuccess: (state, action) => {
       state.user = { ...state.user, ...action.payload };
     },
+    updatePasswordSuccess: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
     logout: (state) => {
       return initialState;
     },
@@ -48,7 +52,8 @@ export const {
   loginFailure, 
   logout, 
   clearError,
-  updateProfileSuccess 
+  updateProfileSuccess,
+  updatePasswordSuccess
 } = authSlice.actions;
 
 // Mock login action para desenvolvimento offline
@@ -123,6 +128,22 @@ export const updateProfile = (profileData) => (dispatch) => {
     // Aqui apenas simulamos a atualização com sucesso
     dispatch(updateProfileSuccess(profileData));
     return { success: true };
+  } catch (error) {
+    dispatch(loginFailure(error.message));
+    return { success: false, error: error.message };
+  }
+};
+
+// Função para atualizar a senha do usuário
+export const updatePassword = (passwordData) => (dispatch) => {
+  dispatch(loginStart());
+  try {
+    // Em um ambiente real, isso enviaria uma solicitação para atualizar a senha
+    // Aqui apenas simulamos a atualização com sucesso
+    setTimeout(() => {
+      dispatch(updatePasswordSuccess());
+    }, 500);
+    return { success: true, message: 'Senha atualizada com sucesso!' };
   } catch (error) {
     dispatch(loginFailure(error.message));
     return { success: false, error: error.message };
