@@ -203,61 +203,10 @@ const TransactionHistory = () => {
   
   // Get sample data if no real data is available yet
   const getSampleTransactions = () => {
-    return [
-      {
-        id: 't1',
-        type: 'deposit',
-        amount: '$1,500.00',
-        from: 'Direct Deposit - ABC Corp',
-        to: 'Primary Checking',
-        status: 'completed',
-        date: '2023-05-20T10:30:00Z',
-        reference: 'REF123456'
-      },
-      {
-        id: 't2',
-        type: 'withdrawal',
-        amount: '$200.00',
-        from: 'Primary Checking',
-        to: 'ATM Withdrawal',
-        status: 'completed',
-        date: '2023-05-19T15:45:00Z',
-        reference: 'REF123457'
-      },
-      {
-        id: 't3',
-        type: 'transfer',
-        amount: '$500.00',
-        from: 'Primary Checking',
-        to: 'Savings Account',
-        status: 'completed',
-        date: '2023-05-18T09:15:00Z',
-        reference: 'REF123458'
-      },
-      {
-        id: 't4',
-        type: 'payment',
-        amount: '$75.50',
-        from: 'Primary Checking',
-        to: 'Electric Company',
-        status: 'pending',
-        date: '2023-05-17T14:20:00Z',
-        reference: 'REF123459'
-      },
-      {
-        id: 't5',
-        type: 'deposit',
-        amount: '$100.00',
-        from: 'Mobile Deposit',
-        to: 'Savings Account',
-        status: 'completed',
-        date: '2023-05-16T11:10:00Z',
-        reference: 'REF123460'
-      }
-    ];
+    return [];
   };
   
-  const transactionsToDisplay = transactions && transactions.length > 0 ? transactions : getSampleTransactions();
+  const transactionsToDisplay = [];
   
   return (
     <Box>
